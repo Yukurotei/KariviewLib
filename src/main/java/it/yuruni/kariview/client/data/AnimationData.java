@@ -1,15 +1,13 @@
 package it.yuruni.kariview.client.data;
 
 import it.yuruni.kariview.client.data.elements.GuiElementData;
-import it.yuruni.kariview.client.data.elements.SoundElementData;
 
 import java.util.List;
 
 public class AnimationData {
     private String id;
     private List<Keyframe> keyframes;
-    private List<GuiElementData> guiElements;
-    private List<SoundElementData> soundElements;
+    private List<GuiElementData> elements;
 
     public String getId() {
         return id;
@@ -19,11 +17,30 @@ public class AnimationData {
         return keyframes;
     }
 
-    public List<GuiElementData> getGuiElements() {
-        return guiElements;
+    public List<GuiElementData> getElements() {
+        return elements;
     }
 
-    public List<SoundElementData> getSoundElements() {
-        return soundElements;
+    public long getTotalDuration() {
+        long totalDuration = 0;
+        if (keyframes != null && !keyframes.isEmpty()) {
+            for (Keyframe keyframe : keyframes) {
+                if (keyframe.getTimestamp() > totalDuration) {
+                    totalDuration = keyframe.getTimestamp();
+                }
+            }
+        }
+        return totalDuration;
+    }
+
+    public GuiElementData getElementById(String id) {
+        if (elements != null) {
+            for (GuiElementData element : elements) {
+                if (element != null && element.getId().equals(id)) {
+                    return element;
+                }
+            }
+        }
+        return null;
     }
 }

@@ -2,54 +2,37 @@ package it.yuruni.kariview.client.data;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
-import com.google.gson.JsonSyntaxException;
-import it.yuruni.kariview.Kariview;
+import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.client.data.actions.*;
 import net.minecraftforge.fml.loading.FMLPaths;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.slf4j.Logger;
 
 import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.nio.file.Path;
+import java.util.HashMap;
+import java.util.Map;
 
 public class AnimationLoader {
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogUtils.getLogger();
+    private static final String DATA_PACK_FOLDER = "kariviewlib";
     private static final Gson GSON;
+    private static final Map<String, AnimationData> ANIMATION_CACHE = new HashMap<>();
 
     static {
-        RuntimeTypeAdapterFactory<Action> actionAdapterFactory = RuntimeTypeAdapterFactory.of(Action.class, "type")
+        RuntimeTypeAdapterFactory<Action> actionAdapter = RuntimeTypeAdapterFactory.of(Action.class, "type")
                 .registerSubtype(ShowElementAction.class, "show_element")
                 .registerSubtype(HideElementAction.class, "hide_element")
-                .registerSubtype(MoveElementAction.class, "move_element")
                 .registerSubtype(PlaySoundAction.class, "play_sound")
                 .registerSubtype(ShowVanillaHudAction.class, "show_vanilla_hud")
-                .registerSubtype(HideVanillaHudAction.class, "hide_vanilla_hud");
+                .registerSubtype(HideVanillaHudAction.class, "hide_vanilla_hud")
+                .registerSubtype(MoveElementAction.class, "move_element");
 
         GSON = new GsonBuilder()
-                .registerTypeAdapterFactory(actionAdapterFactory)
-                .setPrettyPrinting()
+                .registerTypeAdapterFactory(actionAdapter)
+                .setLenient()
                 .create();
-    }
-
-    public static AnimationData loadAnimation(String namespace, String animationId) {
-        File file = getAnimationFile(namespace, animationId);
-
-        if (!file.exists()) {
-            LOGGER.error("Animation file not found: " + file.getAbsolutePath());
-            return null;
-        }
-
-        try (FileReader reader = new FileReader(file)) {
-            return GSON.fromJson(reader, AnimationData.class);
-        } catch (IOException e) {
-            LOGGER.error("Failed to read animation file: " + file.getAbsolutePath(), e);
-        } catch (JsonSyntaxException e) {
-            LOGGER.error("Failed to parse animation JSON: " + file.getAbsolutePath(), e);
-        }
-        return null;
     }
 
     public static void ensureMainDirectoryExists() {
@@ -65,10 +48,13 @@ public class AnimationLoader {
     }
 
     private static void createTemplateAnimation(File mainDir) {
-        // Create the template directory and file
-        File templateDir = new File(mainDir, "example");
-        if (templateDir.mkdirs()) {
-            File templateFile = new File(templateDir, "template.json");
+        File exampleDir = new File(mainDir, "example");
+        File assetsDir = new File(exampleDir, "assets");
+        File texturesDir = new File(assetsDir, "textures");
+        File animationsDir = new File(exampleDir, "animations");
+
+        if (exampleDir.mkdirs() && assetsDir.mkdirs() && texturesDir.mkdirs() && animationsDir.mkdirs()) {
+            File templateFile = new File(animationsDir, "template.json");
             try (FileWriter writer = new FileWriter(templateFile)) {
                 String templateContent = "{\n" +
                         "  \"id\": \"template_animation\",\n" +
@@ -76,7 +62,7 @@ public class AnimationLoader {
                         "    {\n" +
                         "      \"element_id\": \"example_image\",\n" +
                         "      \"type\": \"gui_element\",\n" +
-                        "      \"texture_path\": \"example.png\"\n" +
+                        "      \"texture_path\": \"textures/example.png\"\n" +
                         "    }\n" +
                         "  ],\n" +
                         "  \"keyframes\": [\n" +
@@ -85,11 +71,7 @@ public class AnimationLoader {
                         "      \"actions\": [\n" +
                         "        {\n" +
                         "          \"type\": \"show_element\",\n" +
-                        "          \"element_id\": \"example_image\",\n" +
-                        "          \"x\": 0,\n" +
-                        "          \"y\": 0,\n" +
-                        "          \"width\": 128,\n" +
-                        "          \"height\": 128\n" +
+                        "          \"element_id\": \"example_image\"\n" +
                         "        }\n" +
                         "      ]\n" +
                         "    }\n" +
@@ -100,12 +82,56 @@ public class AnimationLoader {
             } catch (IOException e) {
                 LOGGER.error("Failed to write template animation file.", e);
             }
+
+            File templateImageFile = new File(texturesDir, "example.png");
+            try {
+                // You will need a default image to be copied here. For now, we'll just log
+                // that a placeholder is needed.
+                LOGGER.info("Please add a placeholder image 'example.png' to the textures folder.");
+            } catch (Exception e) {
+                LOGGER.error("Failed to create template image file.", e);
+            }
+        } else {
+            LOGGER.error("Failed to create all necessary subdirectories.");
+        }
+    }
+
+    public static AnimationData loadAnimation(String namespace, String animationId) {
+        String cacheKey = namespace + ":" + animationId;
+        if (ANIMATION_CACHE.containsKey(cacheKey)) {
+            return ANIMATION_CACHE.get(cacheKey);
+        }
+
+        try {
+            File animationFile = getAnimationFile(namespace, animationId);
+            if (!animationFile.exists()) {
+                LOGGER.error("Animation file not found: " + animationFile.getAbsolutePath());
+                return null;
+            }
+
+            try (FileReader reader = new FileReader(animationFile)) {
+                AnimationData data = GSON.fromJson(reader, AnimationData.class);
+                ANIMATION_CACHE.put(cacheKey, data);
+                return data;
+            }
+        } catch (IOException e) {
+            LOGGER.error("Failed to load animation: " + cacheKey, e);
+            return null;
         }
     }
 
     private static File getAnimationFile(String namespace, String animationId) {
-        Path mainDir = FMLPaths.GAMEDIR.get().resolve("kariviewlib");
-        Path animationDir = mainDir.resolve(namespace);
-        return animationDir.resolve(animationId + ".json").toFile();
+        String gameDir = System.getProperty("user.dir");
+        File dataPackDir = new File(gameDir, DATA_PACK_FOLDER);
+        File namespaceDir = new File(dataPackDir, namespace);
+        File animationsDir = new File(namespaceDir, "animations");
+        return new File(animationsDir, animationId + ".json");
+    }
+
+    public static File getAssetFile(String namespace, String assetPath) {
+        String gameDir = System.getProperty("user.dir");
+        File dataPackDir = new File(gameDir, DATA_PACK_FOLDER);
+        File namespaceDir = new File(dataPackDir, namespace);
+        return new File(namespaceDir, assetPath);
     }
 }

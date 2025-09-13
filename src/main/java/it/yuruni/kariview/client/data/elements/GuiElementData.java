@@ -1,12 +1,12 @@
 package it.yuruni.kariview.client.data.elements;
 
+import com.google.gson.annotations.SerializedName;
+
 public class GuiElementData {
+    @SerializedName("element_id")
     private String id;
+    @SerializedName("texture_path")
     private String texture;
-    private double posX;
-    private double posY;
-    private int width;
-    private int height;
 
     public String getId() {
         return id;
@@ -14,21 +14,5 @@ public class GuiElementData {
 
     public String getTexture() {
         return texture;
-    }
-
-    public double getPosX() {
-        return posX;
-    }
-
-    public double getPosY() {
-        return posY;
-    }
-
-    public int getWidth() {
-        return width;
-    }
-
-    public int getHeight() {
-        return height;
     }
 }

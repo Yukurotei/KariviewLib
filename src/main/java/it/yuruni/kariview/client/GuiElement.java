@@ -1,14 +1,20 @@
 package it.yuruni.kariview.client;
 
+import com.mojang.blaze3d.systems.RenderSystem;
+import it.yuruni.kariview.Kariview;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 public class GuiElement {
-
     private final ResourceLocation texture;
-    private final int x, y, width, height, textureWidth, textureHeight;
+    private final int x;
+    private final int y;
+    private final int width;
+    private final int height;
+    private final int textureWidth;
+    private final int textureHeight;
 
-    public GuiElement(ResourceLocation texture, int x, int y, int textureWidth, int textureHeight, int width, int height) {
+    public GuiElement(ResourceLocation texture, int x, int y, int width, int height, int textureWidth, int textureHeight) {
         this.texture = texture;
         this.x = x;
         this.y = y;
@@ -19,7 +25,7 @@ public class GuiElement {
     }
 
     public void render(GuiGraphics guiGraphics) {
-        guiGraphics.blit(texture, this.x, this.y, 0, 0, this.width, this.height, this.textureWidth, this.textureHeight);
+        RenderSystem.setShaderTexture(0, texture);
+        guiGraphics.blit(texture, x, y, 0, 0, width, height, textureWidth, textureHeight);
     }
 }
-

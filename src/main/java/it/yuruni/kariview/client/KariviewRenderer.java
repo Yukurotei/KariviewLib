@@ -19,31 +19,25 @@ import org.slf4j.Logger;
 public class KariviewRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static boolean isGuiActive = false;
-    private static final int TEXTURE_SIZE = 256;
 
     @SubscribeEvent
     public static void onRenderGui(RenderGuiOverlayEvent.Post event) {
-        //if (!isGuiActive) return;
-
-        Minecraft mc = Minecraft.getInstance();
-        ForgeGui gui = (ForgeGui) mc.gui;
-        GuiGraphics guiGraphics = event.getGuiGraphics();
-
-        // Update the animation manager every frame, ELAPSED TIME IS STILL CALCULATED USING MILLISECONDS
+        if (!isGuiActive) return;
         AnimationManager.tick();
 
-        // Get the active elements from the animation manager
-        for (GuiElementData element : AnimationManager.getActiveElements()) {
-            LOGGER.info("Active element: " + element.getId());
-            renderElement(guiGraphics, mc.getWindow().getGuiScaledWidth(), mc.getWindow().getGuiScaledHeight(), element);
+        GuiGraphics guiGraphics = event.getGuiGraphics();
+
+        for (GuiElement element : AnimationManager.getActiveElements().values()) {
+            element.render(guiGraphics);
         }
     }
 
-    private static void renderElement(GuiGraphics guiGraphics, int screenWidth, int screenHeight, GuiElementData element) {
-        int x = (int) (screenWidth * element.getPosX());
-        int y = (int) (screenHeight * element.getPosY());
-
-        ResourceLocation textureResource = new ResourceLocation(Kariview.MODID, element.getTexture());
-        guiGraphics.blit(textureResource, x, y, 0, 0, element.getWidth(), element.getHeight(), TEXTURE_SIZE, TEXTURE_SIZE);
+    /*
+    @SubscribeEvent
+    public static void onRenderPre(RenderGuiOverlayEvent.Pre event) {
+        if (isGuiActive && event.getOverlay().id().getNamespace().equals("minecraft")) {
+            event.setCanceled(true);
+        }
     }
+     */
 }
