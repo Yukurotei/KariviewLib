@@ -27,6 +27,7 @@ public class AnimationLoader {
                 .registerSubtype(PlaySoundAction.class, "play_sound")
                 .registerSubtype(ShowVanillaHudAction.class, "show_vanilla_hud")
                 .registerSubtype(HideVanillaHudAction.class, "hide_vanilla_hud")
+                .registerSubtype(StopAllSoundAction.class, "stop_all_sounds")
                 .registerSubtype(MoveElementAction.class, "move_element");
 
         GSON = new GsonBuilder()

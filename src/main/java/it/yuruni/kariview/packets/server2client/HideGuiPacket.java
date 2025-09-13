@@ -2,6 +2,7 @@ package it.yuruni.kariview.packets.server2client;
 
 import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.client.KariviewRenderer;
+import it.yuruni.kariview.client.animation.AnimationManager;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraftforge.network.NetworkEvent;
 import org.slf4j.Logger;
@@ -27,7 +28,8 @@ public class HideGuiPacket {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             // Toggle the GUI's active state to false
-            KariviewRenderer.isGuiActive = false;
+            //KariviewRenderer.isGuiActive = false;
+            AnimationManager.stopAllAnimations();
             LOGGER.info("Received hide GUI packet on client! Toggling GUI state to inactive.");
         });
         context.setPacketHandled(true);

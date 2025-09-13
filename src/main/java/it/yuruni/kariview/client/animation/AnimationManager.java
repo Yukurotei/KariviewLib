@@ -9,6 +9,8 @@ import it.yuruni.kariview.client.data.Keyframe;
 import it.yuruni.kariview.client.data.actions.*;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import org.slf4j.Logger;
 
 import java.io.File;
@@ -44,24 +46,23 @@ public class AnimationManager {
 
         long elapsed = System.currentTimeMillis() - animationStartTime;
 
-        if (elapsed > currentAnimation.getTotalDuration()) {
-            KariviewRenderer.isGuiActive = false;
-            currentAnimation = null;
-            activeElements.clear();
-            lastKeyframeIndex = -1;
-            return;
-        }
-
         List<Keyframe> keyframes = currentAnimation.getKeyframes();
+
         for (int i = lastKeyframeIndex + 1; i < keyframes.size(); i++) {
             Keyframe keyframe = keyframes.get(i);
             if (elapsed >= keyframe.getTimestamp()) {
                 executeKeyframeActions(keyframe.getActions());
                 lastKeyframeIndex = i;
             } else {
-                // Keyframes are sorted by timestamp, so we can stop early
                 break;
             }
+        }
+
+        if (lastKeyframeIndex >= keyframes.size() - 1) {
+            KariviewRenderer.isGuiActive = false;
+            currentAnimation = null;
+            activeElements.clear();
+            lastKeyframeIndex = -1;
         }
     }
 
@@ -73,14 +74,26 @@ public class AnimationManager {
         }
 
         for (Action action : actions) {
+            LOGGER.info(action.toString());
             if (action instanceof ShowElementAction) {
                 handleShowElement((ShowElementAction) action);
             } else if (action instanceof HideElementAction) {
                 handleHideElement((HideElementAction) action);
-            }  else if (action instanceof PlaySoundAction) {
+            } else if (action instanceof PlaySoundAction) {
                 handlePlaySound((PlaySoundAction) action);
+            } else if (action instanceof StopAllSoundAction) {
+                LOGGER.info("Stopping all sounds");
+                RawAudio.stopAll();
             }
         }
+    }
+
+    public static void stopAllAnimations() {
+        KariviewRenderer.isGuiActive = false;
+        currentAnimation = null;
+        activeElements.clear();
+        lastKeyframeIndex = -1;
+        RawAudio.stopAll();
     }
 
     private static void handleShowElement(ShowElementAction action) {
@@ -101,7 +114,7 @@ public class AnimationManager {
     private static void handlePlaySound(PlaySoundAction action) {
         File soundFile = AssetManager.loadSound(currentAnimation.getNamespace(), action.getSoundId());
         if (soundFile != null) {
-            RawAudio.playOgg(soundFile.getAbsolutePath());
+            RawAudio.playOgg(soundFile.getAbsolutePath(), action.getVolume());
         } else {
             LOGGER.error("Failed to load sound file: {}:{}", currentAnimation.getNamespace(), action.getSoundId());
         }

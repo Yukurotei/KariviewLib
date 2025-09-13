@@ -9,11 +9,14 @@ import org.lwjgl.stb.STBVorbisInfo;
 
 import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
+import java.util.ArrayList;
+import java.util.List;
 
 public class RawAudio {
     private static final Logger LOGGER = LogManager.getLogger();
+    public static final List<Integer> activeSources = new ArrayList<>();
 
-    public static void playOgg(String path) {
+    public static void playOgg(String path, float volume) {
         try (STBVorbisInfo info = STBVorbisInfo.malloc()) {
             IntBuffer error = BufferUtils.createIntBuffer(1);
             long decoder = STBVorbis.stb_vorbis_open_filename(path, error, null);
@@ -36,10 +39,23 @@ public class RawAudio {
 
             int source = AL10.alGenSources();
             AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
+            AL10.alSourcef(source, AL10.AL_GAIN, volume);
             AL10.alSourcePlay(source);
+
+            activeSources.add(source); // Add the source to our list for cleanup
 
             STBVorbis.stb_vorbis_close(decoder);
         }
+    }
+
+    public static void stopAll() {
+        for (int source : activeSources) {
+            if (AL10.alIsSource(source)) {
+                AL10.alSourceStop(source);
+                AL10.alDeleteSources(source);
+            }
+        }
+        activeSources.clear();
     }
 }
 
