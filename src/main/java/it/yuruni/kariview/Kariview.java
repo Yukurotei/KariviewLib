@@ -1,6 +1,7 @@
 package it.yuruni.kariview;
 
 import com.mojang.logging.LogUtils;
+import it.yuruni.kariview.client.data.AnimationLoader;
 import it.yuruni.kariview.packets.PacketHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -12,7 +13,7 @@ import org.slf4j.Logger;
 @Mod(Kariview.MODID)
 public class Kariview {
     public static final String MODID = "kariviewlib";
-    private static final Logger LOGGER = LogUtils.getLogger();
+    public static final Logger LOGGER = LogUtils.getLogger();
 
     public Kariview() {
         IEventBus modEventBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -28,5 +29,6 @@ public class Kariview {
 
     private void onClientSetup(final FMLClientSetupEvent event) {
         LOGGER.info("Kariview client setup complete!");
+        AnimationLoader.ensureMainDirectoryExists();
     }
 }

@@ -2,6 +2,7 @@ package it.yuruni.kariview.packets;
 
 import it.yuruni.kariview.Kariview;
 import it.yuruni.kariview.packets.server2client.HideGuiPacket;
+import it.yuruni.kariview.packets.server2client.PlayAnimationPacket;
 import it.yuruni.kariview.packets.server2client.ShowGuiPacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkDirection;
@@ -31,6 +32,11 @@ public class PacketHandler {
                 HideGuiPacket::encode,
                 HideGuiPacket::decode,
                 HideGuiPacket::handle);
+        INSTANCE.registerMessage(packetId++,
+                PlayAnimationPacket.class,
+                PlayAnimationPacket::encode,
+                PlayAnimationPacket::decode,
+                PlayAnimationPacket::handle);
     }
 
     public static <MSG> void sendToAll(MSG message) {
