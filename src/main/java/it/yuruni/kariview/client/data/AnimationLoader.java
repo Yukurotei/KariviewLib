@@ -111,6 +111,7 @@ public class AnimationLoader {
 
             try (FileReader reader = new FileReader(animationFile)) {
                 AnimationData data = GSON.fromJson(reader, AnimationData.class);
+                data.namespace = namespace;
                 ANIMATION_CACHE.put(cacheKey, data);
                 return data;
             }

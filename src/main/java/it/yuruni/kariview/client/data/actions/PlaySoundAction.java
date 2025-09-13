@@ -1,11 +1,14 @@
 package it.yuruni.kariview.client.data.actions;
 
+import com.google.gson.annotations.SerializedName;
+
 public class PlaySoundAction implements Action {
-    private String elementId;
+    @SerializedName("sound_id")
+    private String soundId;
     private float volume;
 
-    public String getElementId() {
-        return elementId;
+    public String getSoundId() {
+        return soundId;
     }
 
     public float getVolume() {

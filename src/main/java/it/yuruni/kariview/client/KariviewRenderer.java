@@ -3,13 +3,9 @@ package it.yuruni.kariview.client;
 import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.Kariview;
 import it.yuruni.kariview.client.animation.AnimationManager;
-import it.yuruni.kariview.client.data.elements.GuiElementData;
-import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
-import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
-import net.minecraftforge.client.gui.overlay.ForgeGui;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 
 import net.minecraftforge.fml.common.Mod;
@@ -31,13 +27,4 @@ public class KariviewRenderer {
             element.render(guiGraphics);
         }
     }
-
-    /*
-    @SubscribeEvent
-    public static void onRenderPre(RenderGuiOverlayEvent.Pre event) {
-        if (isGuiActive && event.getOverlay().id().getNamespace().equals("minecraft")) {
-            event.setCanceled(true);
-        }
-    }
-     */
 }

@@ -5,10 +5,10 @@ import it.yuruni.kariview.client.data.actions.Action;
 import java.util.List;
 
 public class Keyframe {
-    private int timestamp;
+    private long timestamp;
     private List<Action> actions;
 
-    public int getTimestamp() {
+    public long getTimestamp() {
         return timestamp;
     }
 

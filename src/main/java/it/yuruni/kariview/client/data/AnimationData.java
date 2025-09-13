@@ -8,6 +8,7 @@ public class AnimationData {
     private String id;
     private List<Keyframe> keyframes;
     private List<GuiElementData> elements;
+    public String namespace = "";
 
     public String getId() {
         return id;
@@ -42,5 +43,9 @@ public class AnimationData {
             }
         }
         return null;
+    }
+
+    public String getNamespace() {
+        return namespace;
     }
 }
