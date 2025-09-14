@@ -9,6 +9,8 @@ public class ScaleAction implements Action {
     private double targetScale;
     @SerializedName("duration")
     private long duration;
+    @SerializedName("easing_type")
+    private String easingType;
 
     public String getElementId() {
         return elementId;
@@ -20,5 +22,9 @@ public class ScaleAction implements Action {
 
     public long getDuration() {
         return duration;
+    }
+
+    public String getEasingType() {
+        return easingType;
     }
 }

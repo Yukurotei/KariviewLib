@@ -32,24 +32,7 @@ public class AnimationManager {
     private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
     private static final Map<String, ScaleState> scalingStates = new HashMap<>();
 
-    private static class ScaleState {
-        private final long startTime;
-        private final double startScale;
-        private final double targetScale;
-        private final long duration;
-
-        public ScaleState(long startTime, double startScale, double targetScale, long duration) {
-            this.startTime = startTime;
-            this.startScale = startScale;
-            this.targetScale = targetScale;
-            this.duration = duration;
-        }
-
-        public long getStartTime() { return startTime; }
-        public double getStartScale() { return startScale; }
-        public double getTargetScale() { return targetScale; }
-        public long getDuration() { return duration; }
-    }
+    private record ScaleState(long startTime, double startScale, double targetScale, long duration, String easingType) {}
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -65,10 +48,7 @@ public class AnimationManager {
         AnimationData data = AnimationLoader.loadAnimation(namespace, animationId);
         if (data != null) {
             LOGGER.info("Starting animation: {}", data.getId());
-            currentAnimation = data;
-            animationStartTime = System.currentTimeMillis();
-            KariviewRenderer.isGuiActive = true;
-            activeElements.clear(); // Clear old elements
+            startAnimation(data);
         } else {
             LOGGER.error("Failed to load animation: {}:{}", namespace, animationId);
         }
@@ -118,14 +98,15 @@ public class AnimationManager {
                 return true;
             }
 
-            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.getStartTime();
-            if (elapsedSinceStart >= state.getDuration()) {
-                element.setScale(state.getTargetScale());
+            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
+            if (elapsedSinceStart >= state.duration()) {
+                element.setScale(state.targetScale());
                 return true;
             }
 
-            double progress = (double) elapsedSinceStart / state.getDuration();
-            double newScale = state.getStartScale() + (state.getTargetScale() - state.getStartScale()) * progress;
+            double progress = (double) elapsedSinceStart / state.duration();
+            double easedProgress = Easing.getEasedProgress(state.easingType(), progress); //Eased progress
+            double newScale = state.startScale() + (state.targetScale() - state.startScale()) * easedProgress; // Use eased progress
             element.setScale(newScale);
 
             return false;
@@ -230,11 +211,13 @@ public class AnimationManager {
     private static void handleScaleAction(ScaleAction action) {
         GuiElement element = activeElements.get(action.getElementId());
         if (element != null) {
+            LOGGER.info("Easing type: {}", action.getEasingType());
             scalingStates.put(action.getElementId(), new ScaleState(
                     System.currentTimeMillis() - animationStartTime,
                     element.getScale(),
                     action.getTargetScale(),
-                    action.getDuration()
+                    action.getDuration(),
+                    action.getEasingType()
             ));
         } else {
             LOGGER.error("ScaleAction: No active element found for id: {}", action.getElementId());
