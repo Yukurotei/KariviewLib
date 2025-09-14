@@ -31,8 +31,11 @@ public class AnimationManager {
     private static final Map<String, Long> spriteUpdateIntervals = new HashMap<>();
     private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
     private static final Map<String, ScaleState> scalingStates = new HashMap<>();
+    private static final Map<String, FadeState> fadingStates = new HashMap<>();
 
     private record ScaleState(long startTime, double startScale, double targetScale, long duration, String easingType) {}
+
+    private record FadeState(long startTime, float startOpacity, float targetOpacity, long duration, String easingType) {}
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -111,6 +114,30 @@ public class AnimationManager {
 
             return false;
         });
+
+        //Check if fading is finished
+        fadingStates.entrySet().removeIf(entry -> {
+            String elementId = entry.getKey();
+            FadeState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element == null) {
+                return true;
+            }
+
+            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
+            if (elapsedSinceStart >= state.duration()) {
+                element.setOpacity(state.targetOpacity());
+                return true;
+            }
+
+            double progress = (double) elapsedSinceStart / state.duration();
+            double easedProgress = Easing.getEasedProgress(state.easingType(), progress);
+            float newOpacity = (float) (state.startOpacity() + (state.targetOpacity() - state.startOpacity()) * easedProgress);
+            element.setOpacity(newOpacity);
+
+            return false;
+        });
+
 
         // Loop through all active sprite animations and update them
         for (Map.Entry<String, Long> entry : spriteUpdateIntervals.entrySet()) {
@@ -225,7 +252,6 @@ public class AnimationManager {
     private static void handleScaleAction(ScaleAction action) {
         GuiElement element = activeElements.get(action.getElementId());
         if (element != null) {
-            LOGGER.info("Easing type: {}", action.getEasingType());
             scalingStates.put(action.getElementId(), new ScaleState(
                     System.currentTimeMillis() - animationStartTime,
                     element.getScale(),
@@ -375,6 +401,19 @@ public class AnimationManager {
 
             if (textureResource != null) {
                 GuiElement newElement = new GuiElement(textureResource, action.getX(), action.getY(), action.getWidth(), action.getHeight(), action.getTextureWidth(), action.getTextureHeight());
+                if (action.getStartOpacity() != null) {
+                    newElement.setOpacity(action.getStartOpacity());
+                    if (action.getFadeDuration() != null && action.getFadeDuration() > 0) {
+                        fadingStates.put(action.getElementId(), new FadeState(
+                                System.currentTimeMillis() - animationStartTime,
+                                action.getStartOpacity(),
+                                action.getTargetOpacity() != null ? action.getTargetOpacity() : 1.0f,
+                                action.getFadeDuration(),
+                                action.getFadeEasingType() != null ? action.getFadeEasingType() : "linear"
+                        ));
+                    }
+                }
+
                 activeElements.put(action.getElementId(), newElement);
             } else {
                 LOGGER.error("Failed to load texture for element: {}", elementData.getId());

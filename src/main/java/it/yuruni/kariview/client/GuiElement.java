@@ -1,5 +1,6 @@
 package it.yuruni.kariview.client;
 
+import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import it.yuruni.kariview.Kariview;
 import net.minecraft.client.Minecraft;
@@ -15,6 +16,7 @@ public class GuiElement {
     private final int textureWidth;
     private final int textureHeight;
     private double scale = 1.0;
+    private float opacity = 1.0f;
 
     public GuiElement(ResourceLocation texture, double x, double y, double width, double height, int textureWidth, int textureHeight) {
         this.texture = texture;
@@ -36,6 +38,14 @@ public class GuiElement {
 
     public double getScale() {
         return this.scale;
+    }
+
+    public void setOpacity(float opacity) {
+        this.opacity = opacity;
+    }
+
+    public float getOpacity() {
+        return opacity;
     }
 
     public void render(GuiGraphics guiGraphics) {
@@ -64,7 +74,10 @@ public class GuiElement {
         int drawX = initialX - (scaledWidth - initialWidth) / 2;
         int drawY = initialY - (scaledHeight - initialHeight) / 2;
 
-        // Render
+        RenderSystem.enableBlend();
+        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.opacity);
+
         guiGraphics.blit(
                 texture,
                 drawX, drawY,
@@ -73,5 +86,9 @@ public class GuiElement {
                 textureWidth, textureHeight,
                 textureWidth, textureHeight
         );
+
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.disableBlend();
     }
+
 }

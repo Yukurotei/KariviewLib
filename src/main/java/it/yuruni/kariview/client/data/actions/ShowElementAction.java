@@ -13,6 +13,14 @@ public class ShowElementAction implements Action {
     private int textureWidth;
     @SerializedName("texture_height")
     private int textureHeight;
+    @SerializedName("start_opacity")
+    private Float startOpacity;
+    @SerializedName("target_opacity")
+    private Float targetOpacity;
+    @SerializedName("fade_duration")
+    private Long fadeDuration;
+    @SerializedName("fade_easing_type")
+    private String fadeEasingType;
 
     public String getElementId() {
         return elementId;
@@ -40,5 +48,21 @@ public class ShowElementAction implements Action {
 
     public int getTextureHeight() {
         return textureHeight;
+    }
+
+    public Float getStartOpacity() {
+        return startOpacity;
+    }
+
+    public Float getTargetOpacity() {
+        return targetOpacity;
+    }
+
+    public Long getFadeDuration() {
+        return fadeDuration;
+    }
+
+    public String getFadeEasingType() {
+        return fadeEasingType;
     }
 }
