@@ -179,6 +179,20 @@ public class AnimationManager {
         RawAudio.stopAll();
     }
 
+    public static void reload() {
+        currentAnimation = null;
+        animationStartTime = 0;
+        lastKeyframeIndex = -1;
+        activeElements.clear();
+        spriteStates.clear();
+        animatedStepStates.clear();
+        scalingStates.clear();
+        //fadingStates.clear();
+        spriteUpdateIntervals.clear();
+
+        AnimationLoader.loadAllAnimations();
+    }
+
     private static void executeKeyframeActions(List<Action> actions) {
         if (actions == null) {
             return;

@@ -4,6 +4,7 @@ import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import it.yuruni.kariview.Kariview;
+import it.yuruni.kariview.client.animation.AnimationManager;
 import it.yuruni.kariview.client.data.AnimationData;
 import it.yuruni.kariview.client.data.AnimationLoader;
 import it.yuruni.kariview.packets.PacketHandler;
@@ -21,7 +22,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
 @Mod.EventBusSubscriber(modid = Kariview.MODID)
-public class KariViewGuiCommands {
+public class KariViewCommands {
     private static final Logger LOGGER = LogManager.getLogger();
 
     @SubscribeEvent
@@ -31,21 +32,30 @@ public class KariViewGuiCommands {
                 Commands.literal("kariview")
                         .then(Commands.literal("enableView")
                                 .requires(source -> source.hasPermission(2))
-                                .executes(KariViewGuiCommands::executeShowView)
+                                .executes(KariViewCommands::executeShowView)
                         )
                         .then(Commands.literal("stopView")
                                 .requires(source -> source.hasPermission(2))
-                                .executes(KariViewGuiCommands::executeStopView)
+                                .executes(KariViewCommands::executeStopView)
                         )
                         .then(Commands.literal("playAnimation")
                                 .requires(source -> source.hasPermission(2))
                                 .then(Commands.argument("namespace", StringArgumentType.string())
                                         .then(Commands.argument("animationId", StringArgumentType.string())
-                                                .executes(KariViewGuiCommands::executePlayAnimation)
+                                                .executes(KariViewCommands::executePlayAnimation)
                                         )
                                 )
                         )
+                        .then(Commands.literal("reload")
+                                .requires(source -> source.hasPermission(2))
+                                .executes(KariViewCommands::reloadAnimations))
         );
+    }
+
+    private static int reloadAnimations(CommandContext<CommandSourceStack> context) {
+        AnimationManager.reload();
+        context.getSource().sendSuccess(() -> Component.literal("Animations reloaded."), false);
+        return 1;
     }
 
     private static int executeShowView(CommandContext<CommandSourceStack> ctx) {

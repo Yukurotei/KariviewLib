@@ -3,6 +3,7 @@ package it.yuruni.kariview.client.data;
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
+import it.yuruni.kariview.client.animation.AssetManager;
 import it.yuruni.kariview.client.data.actions.*;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.slf4j.Logger;
@@ -11,14 +12,17 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.stream.Stream;
 
 public class AnimationLoader {
     private static final Logger LOGGER = LogUtils.getLogger();
     private static final String DATA_PACK_FOLDER = "kariviewlib";
     private static final Gson GSON;
-    private static final Map<String, AnimationData> ANIMATION_CACHE = new HashMap<>();
+    public static final Map<String, AnimationData> ANIMATION_CACHE = new HashMap<>();
 
     static {
         RuntimeTypeAdapterFactory<Action> actionAdapter = RuntimeTypeAdapterFactory.of(Action.class, "type")
@@ -39,6 +43,41 @@ public class AnimationLoader {
                 .registerTypeAdapterFactory(actionAdapter)
                 .setLenient()
                 .create();
+    }
+
+    public static void loadAllAnimations() {
+        ANIMATION_CACHE.clear();
+        File mainDir = FMLPaths.GAMEDIR.get().resolve(DATA_PACK_FOLDER).toFile();
+        if (!mainDir.exists()) {
+            LOGGER.warn("KariviewLib main directory not found. No animations will be loaded.");
+            return;
+        }
+
+        try (Stream<Path> walk = Files.walk(mainDir.toPath())) {
+            walk.filter(Files::isRegularFile)
+                    .filter(path -> path.toString().endsWith(".json"))
+                    .forEach(path -> {
+                        try {
+                            String relativePath = mainDir.toPath().relativize(path).toString().replace(File.separator, "/");
+                            String[] parts = relativePath.split("/");
+
+                            if (parts.length == 3 && parts[1].equals("animations")) {
+                                String namespace = parts[0];
+                                String animationId = parts[2].replace(".json", "");
+                                loadAnimation(namespace, animationId);
+                                LOGGER.info("Loading animation {}:{}", namespace, animationId);
+                            } else {
+                                LOGGER.warn("Skipping invalid animation file path: " + relativePath);
+                            }
+                        } catch (Exception e) {
+                            LOGGER.error("Failed to process animation file: " + path, e);
+                        }
+                    });
+        } catch (IOException e) {
+            LOGGER.error("Failed to walk the animation directory.", e);
+        }
+
+        AssetManager.loadAllTextures();
     }
 
     public static void ensureMainDirectoryExists() {

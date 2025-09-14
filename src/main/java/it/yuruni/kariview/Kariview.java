@@ -30,5 +30,6 @@ public class Kariview {
     private void onClientSetup(final FMLClientSetupEvent event) {
         LOGGER.info("Kariview client setup complete!");
         AnimationLoader.ensureMainDirectoryExists();
+        AnimationLoader.loadAllAnimations();
     }
 }
