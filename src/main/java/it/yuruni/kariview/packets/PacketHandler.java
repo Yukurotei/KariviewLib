@@ -1,11 +1,10 @@
 package it.yuruni.kariview.packets;
 
 import it.yuruni.kariview.Kariview;
-import it.yuruni.kariview.packets.server2client.HideGuiPacket;
+import it.yuruni.kariview.packets.server2client.StopViewPacket;
 import it.yuruni.kariview.packets.server2client.PlayAnimationPacket;
-import it.yuruni.kariview.packets.server2client.ShowGuiPacket;
+import it.yuruni.kariview.packets.server2client.ShowViewPacket;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraftforge.network.NetworkDirection;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
 import net.minecraftforge.network.simple.SimpleChannel;
@@ -23,15 +22,15 @@ public class PacketHandler {
     public static void register() {
         // Register our packet to be sent from the server to the client.
         INSTANCE.registerMessage(packetId++,
-                ShowGuiPacket.class,
-                ShowGuiPacket::encode,
-                ShowGuiPacket::decode,
-                ShowGuiPacket::handle);
+                ShowViewPacket.class,
+                ShowViewPacket::encode,
+                ShowViewPacket::decode,
+                ShowViewPacket::handle);
         INSTANCE.registerMessage(packetId++,
-                HideGuiPacket.class,
-                HideGuiPacket::encode,
-                HideGuiPacket::decode,
-                HideGuiPacket::handle);
+                StopViewPacket.class,
+                StopViewPacket::encode,
+                StopViewPacket::decode,
+                StopViewPacket::handle);
         INSTANCE.registerMessage(packetId++,
                 PlayAnimationPacket.class,
                 PlayAnimationPacket::encode,

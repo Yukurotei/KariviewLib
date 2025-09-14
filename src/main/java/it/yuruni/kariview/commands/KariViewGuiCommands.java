@@ -7,13 +7,12 @@ import it.yuruni.kariview.Kariview;
 import it.yuruni.kariview.client.data.AnimationData;
 import it.yuruni.kariview.client.data.AnimationLoader;
 import it.yuruni.kariview.packets.PacketHandler;
-import it.yuruni.kariview.packets.server2client.HideGuiPacket;
+import it.yuruni.kariview.packets.server2client.StopViewPacket;
 import it.yuruni.kariview.packets.server2client.PlayAnimationPacket;
-import it.yuruni.kariview.packets.server2client.ShowGuiPacket;
+import it.yuruni.kariview.packets.server2client.ShowViewPacket;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraftforge.event.RegisterCommandsEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -30,13 +29,13 @@ public class KariViewGuiCommands {
         CommandDispatcher<CommandSourceStack> dispatcher = event.getDispatcher();
         dispatcher.register(
                 Commands.literal("kariview")
-                        .then(Commands.literal("showGui")
+                        .then(Commands.literal("enableView")
                                 .requires(source -> source.hasPermission(2))
-                                .executes(KariViewGuiCommands::executeShowGui)
+                                .executes(KariViewGuiCommands::executeShowView)
                         )
-                        .then(Commands.literal("hideGui")
+                        .then(Commands.literal("stopView")
                                 .requires(source -> source.hasPermission(2))
-                                .executes(KariViewGuiCommands::executeHideGui)
+                                .executes(KariViewGuiCommands::executeStopView)
                         )
                         .then(Commands.literal("playAnimation")
                                 .requires(source -> source.hasPermission(2))
@@ -49,17 +48,15 @@ public class KariViewGuiCommands {
         );
     }
 
-    private static int executeShowGui(CommandContext<CommandSourceStack> ctx) {
-        LOGGER.info("Command '/kariview showGui' was executed!");
-        ctx.getSource().sendSuccess(() -> Component.literal("Displaying custom GUI..."), false);
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ShowGuiPacket());
+    private static int executeShowView(CommandContext<CommandSourceStack> ctx) {
+        ctx.getSource().sendSuccess(() -> Component.literal("Displaying custom view..."), false);
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ShowViewPacket());
         return 1;
     }
 
-    private static int executeHideGui(CommandContext<CommandSourceStack> ctx) {
-        LOGGER.info("Command '/kariview hideGui' was executed!");
-        ctx.getSource().sendSuccess(() -> Component.literal("Hiding custom GUI..."), false);
-        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new HideGuiPacket());
+    private static int executeStopView(CommandContext<CommandSourceStack> ctx) {
+        ctx.getSource().sendSuccess(() -> Component.literal("Hiding custom view..."), false);
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new StopViewPacket());
         return 1;
     }
 

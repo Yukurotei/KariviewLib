@@ -7,27 +7,26 @@ import java.util.function.Supplier;
 import com.mojang.logging.LogUtils;
 import org.slf4j.Logger;
 
-public class ShowGuiPacket {
+public class ShowViewPacket {
     private static final Logger LOGGER = LogUtils.getLogger();
 
-    public ShowGuiPacket() {
-        // This packet currently holds no data.
+    public ShowViewPacket() {
+
     }
 
-    public static void encode(ShowGuiPacket msg, FriendlyByteBuf buf) {
-        // No data to encode for this simple packet.
+    public static void encode(ShowViewPacket msg, FriendlyByteBuf buf) {
+
     }
 
-    public static ShowGuiPacket decode(FriendlyByteBuf buf) {
-        return new ShowGuiPacket();
+    public static ShowViewPacket decode(FriendlyByteBuf buf) {
+        return new ShowViewPacket();
     }
 
-    public static void handle(ShowGuiPacket msg, Supplier<NetworkEvent.Context> contextSupplier) {
+    public static void handle(ShowViewPacket msg, Supplier<NetworkEvent.Context> contextSupplier) {
         NetworkEvent.Context context = contextSupplier.get();
         context.enqueueWork(() -> {
             //Toggle the GUI's active state
             KariviewRenderer.isGuiActive = true;
-            LOGGER.info("Received show GUI packet on client! Toggling GUI state to active.");
         });
         context.setPacketHandled(true);
     }
