@@ -4,15 +4,23 @@ import com.google.gson.annotations.SerializedName;
 
 public class GuiElementData {
     @SerializedName("element_id")
-    private String id;
+    private String elementId;
+
     @SerializedName("texture_path")
-    private String texture;
+    private String texturePath;
+
+    @SerializedName("texture_path_pattern")
+    private String texturePathPattern;
 
     public String getId() {
-        return id;
+        return elementId;
     }
 
     public String getTexture() {
-        return texture;
+        return texturePath;
+    }
+
+    public String getTexturePathPattern() {
+        return texturePathPattern;
     }
 }

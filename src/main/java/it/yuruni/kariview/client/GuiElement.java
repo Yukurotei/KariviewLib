@@ -6,7 +6,7 @@ import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 public class GuiElement {
-    private final ResourceLocation texture;
+    private ResourceLocation texture;
     private final int x;
     private final int y;
     private final int width;
@@ -23,6 +23,11 @@ public class GuiElement {
         this.textureWidth = textureWidth;
         this.textureHeight = textureHeight;
     }
+
+    public void setTexture(ResourceLocation newTexture) {
+        this.texture = newTexture;
+    }
+
 
     public void render(GuiGraphics guiGraphics) {
         RenderSystem.setShaderTexture(0, texture);
