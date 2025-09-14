@@ -30,6 +30,26 @@ public class AnimationManager {
     private static final Map<String, SpriteState> spriteStates = new HashMap<>();
     private static final Map<String, Long> spriteUpdateIntervals = new HashMap<>();
     private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
+    private static final Map<String, ScaleState> scalingStates = new HashMap<>();
+
+    private static class ScaleState {
+        private final long startTime;
+        private final double startScale;
+        private final double targetScale;
+        private final long duration;
+
+        public ScaleState(long startTime, double startScale, double targetScale, long duration) {
+            this.startTime = startTime;
+            this.startScale = startScale;
+            this.targetScale = targetScale;
+            this.duration = duration;
+        }
+
+        public long getStartTime() { return startTime; }
+        public double getStartScale() { return startScale; }
+        public double getTargetScale() { return targetScale; }
+        public long getDuration() { return duration; }
+    }
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -61,6 +81,7 @@ public class AnimationManager {
 
         long elapsed = System.currentTimeMillis() - animationStartTime;
 
+        //Check if step animating is finished
         animatedStepStates.entrySet().removeIf(entry -> {
             String elementId = entry.getKey();
             AnimatedStepState state = entry.getValue();
@@ -84,6 +105,28 @@ public class AnimationManager {
 
             spriteStates.get(elementId).setCurrentIndex(newIndex);
             activeElement.setTexture(spriteStates.get(elementId).getCurrentSprite());
+
+            return false;
+        });
+
+        //Check if scaling animation is finished
+        scalingStates.entrySet().removeIf(entry -> {
+            String elementId = entry.getKey();
+            ScaleState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element == null) {
+                return true;
+            }
+
+            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.getStartTime();
+            if (elapsedSinceStart >= state.getDuration()) {
+                element.setScale(state.getTargetScale());
+                return true;
+            }
+
+            double progress = (double) elapsedSinceStart / state.getDuration();
+            double newScale = state.getStartScale() + (state.getTargetScale() - state.getStartScale()) * progress;
+            element.setScale(newScale);
 
             return false;
         });
@@ -178,7 +221,23 @@ public class AnimationManager {
                 handleStepSpriteIndex((StepSpriteIndexAction) action);
             } else if (action instanceof StopSpriteAnimationAction) {
                 handleStopSpriteAnimation((StopSpriteAnimationAction) action);
+            } else if (action instanceof ScaleAction) {
+                handleScaleAction((ScaleAction) action);
             }
+        }
+    }
+
+    private static void handleScaleAction(ScaleAction action) {
+        GuiElement element = activeElements.get(action.getElementId());
+        if (element != null) {
+            scalingStates.put(action.getElementId(), new ScaleState(
+                    System.currentTimeMillis() - animationStartTime,
+                    element.getScale(),
+                    action.getTargetScale(),
+                    action.getDuration()
+            ));
+        } else {
+            LOGGER.error("ScaleAction: No active element found for id: {}", action.getElementId());
         }
     }
 

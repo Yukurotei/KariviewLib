@@ -5,10 +5,10 @@ import com.google.gson.annotations.SerializedName;
 public class ShowElementAction implements Action {
     @SerializedName("element_id")
     private String elementId;
-    private int x;
-    private int y;
-    private int width;
-    private int height;
+    private double x;
+    private double y;
+    private double width;
+    private double height;
     @SerializedName("texture_width")
     private int textureWidth;
     @SerializedName("texture_height")
@@ -18,19 +18,19 @@ public class ShowElementAction implements Action {
         return elementId;
     }
 
-    public int getX() {
+    public double getX() {
         return x;
     }
 
-    public int getY() {
+    public double getY() {
         return y;
     }
 
-    public int getWidth() {
+    public double getWidth() {
         return width;
     }
 
-    public int getHeight() {
+    public double getHeight() {
         return height;
     }
 

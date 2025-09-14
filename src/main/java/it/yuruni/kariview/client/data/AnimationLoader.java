@@ -32,7 +32,8 @@ public class AnimationLoader {
                 .registerSubtype(UpdateSpriteAction.class, "update_sprite")
                 .registerSubtype(SetSpriteIndexAction.class, "set_sprite_index")
                 .registerSubtype(StepSpriteIndexAction.class, "step_sprite_index")
-                .registerSubtype(StopSpriteAnimationAction.class, "stop_sprite_animation");
+                .registerSubtype(StopSpriteAnimationAction.class, "stop_sprite_animation")
+                .registerSubtype(ScaleAction.class, "scale");
 
         GSON = new GsonBuilder()
                 .registerTypeAdapterFactory(actionAdapter)

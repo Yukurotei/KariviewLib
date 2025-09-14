@@ -14,6 +14,7 @@ public class GuiElement {
     private final double height;
     private final int textureWidth;
     private final int textureHeight;
+    private double scale = 1.0;
 
     public GuiElement(ResourceLocation texture, double x, double y, double width, double height, int textureWidth, int textureHeight) {
         this.texture = texture;
@@ -29,14 +30,48 @@ public class GuiElement {
         this.texture = newTexture;
     }
 
+    public void setScale(double newScale) {
+        this.scale = newScale;
+    }
+
+    public double getScale() {
+        return this.scale;
+    }
+
     public void render(GuiGraphics guiGraphics) {
         int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
-        int finalX = (int) (this.x * screenWidth);
-        int finalY = (int) (this.y * screenHeight);
+        // Initial dimensions in pixels
+        int initialX = (int) (this.x * screenWidth);
+        int initialY = (int) (this.y * screenHeight);
+        int initialWidth = (int) (this.width * screenWidth);
+        int initialHeight = (int) (this.height * screenHeight);
 
-        RenderSystem.setShaderTexture(0, texture);
-        guiGraphics.blit(texture, finalX, finalY, 0, 0, (int)this.width, (int)this.height, textureWidth, textureHeight);
+        // Apply scale
+        int scaledWidth = (int) (initialWidth * scale);
+        int scaledHeight = (int) (initialHeight * scale);
+
+        // Maintain aspect ratio
+        float aspect = (float) textureWidth / (float) textureHeight;
+        if (scaledHeight > scaledWidth / aspect) {
+            scaledHeight = (int) (scaledWidth / aspect);
+        } else {
+            scaledWidth = (int) (scaledHeight * aspect);
+        }
+
+        // Center the scaled element
+        int drawX = initialX - (scaledWidth - initialWidth) / 2;
+        int drawY = initialY - (scaledHeight - initialHeight) / 2;
+
+        // Render
+        guiGraphics.blit(
+                texture,
+                drawX, drawY,
+                scaledWidth, scaledHeight,
+                0.0f, 0.0f,
+                textureWidth, textureHeight,
+                textureWidth, textureHeight
+        );
     }
 }
