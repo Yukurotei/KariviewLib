@@ -29,6 +29,7 @@ public class AnimationManager {
 
     private static final Map<String, SpriteState> spriteStates = new HashMap<>();
     private static final Map<String, Long> spriteUpdateIntervals = new HashMap<>();
+    private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -60,6 +61,34 @@ public class AnimationManager {
 
         long elapsed = System.currentTimeMillis() - animationStartTime;
 
+        animatedStepStates.entrySet().removeIf(entry -> {
+            String elementId = entry.getKey();
+            AnimatedStepState state = entry.getValue();
+            GuiElement activeElement = activeElements.get(elementId);
+
+            if (activeElement == null) {
+                return true; // Remove if element is no longer active
+            }
+
+            long elapsedSinceStart = elapsed - state.getStartTime();
+            if (elapsedSinceStart >= state.getDuration()) {
+                // Animation is complete, set to final frame and remove state
+                int finalIndex = state.shouldLoop() ? (state.getTargetSpriteIndex() + state.getTotalSprites()) % state.getTotalSprites() : state.getTargetSpriteIndex();
+                activeElement.setTexture(spriteStates.get(elementId).getSprites().get(finalIndex));
+                spriteStates.get(elementId).setCurrentIndex(finalIndex);
+                return true; // Remove the state
+            }
+
+            // Calculate the current frame based on elapsed time
+            int newIndex = getNewIndex(state, (double) elapsedSinceStart);
+
+            spriteStates.get(elementId).setCurrentIndex(newIndex);
+            activeElement.setTexture(spriteStates.get(elementId).getCurrentSprite());
+
+            return false;
+        });
+
+        // Loop through all active sprite animations and update them
         for (Map.Entry<String, Long> entry : spriteUpdateIntervals.entrySet()) {
             String elementId = entry.getKey();
             long updateInterval = entry.getValue();
@@ -75,6 +104,7 @@ public class AnimationManager {
                 spriteState.setCurrentIndex(nextIndex);
                 spriteState.setLastUpdateTime(elapsed);
 
+                // Update the texture of the active element directly
                 activeElement.setTexture(spriteState.getCurrentSprite());
             }
         }
@@ -90,9 +120,31 @@ public class AnimationManager {
             }
         }
 
+        // Check if the animation should end
         if (lastKeyframeIndex >= keyframes.size() - 1) {
             stopAllAnimations();
         }
+    }
+
+    private static int getNewIndex(AnimatedStepState state, double elapsedSinceStart) {
+        int totalSteps = state.getTotalSteps();
+        int currentStep = (int) (elapsedSinceStart / state.getDuration() * totalSteps);
+
+        int direction = state.getTargetSpriteIndex() >= state.getStartSpriteIndex() ? 1 : -1;
+        if (state.shouldLoop() && state.getTargetSpriteIndex() < state.getStartSpriteIndex()) {
+            direction = 1;
+        }
+
+        int newIndex;
+        if (state.shouldLoop()) {
+            newIndex = (state.getStartSpriteIndex() + currentStep) % state.getTotalSprites();
+        } else {
+            newIndex = state.getStartSpriteIndex() + (currentStep * direction);
+            if ((direction > 0 && newIndex > state.getTargetSpriteIndex()) || (direction < 0 && newIndex < state.getTargetSpriteIndex())) {
+                newIndex = state.getTargetSpriteIndex();
+            }
+        }
+        return newIndex;
     }
 
     public static void stopAllAnimations() {
@@ -148,13 +200,15 @@ public class AnimationManager {
 
     private static void handleSetSpriteIndex(SetSpriteIndexAction action) {
         SpriteState spriteState = spriteStates.get(action.getElementId());
-        if (spriteState != null) {
+        GuiElement activeElement = activeElements.get(action.getElementId());
+        if (spriteState != null && activeElement != null) {
             int newIndex = action.getTargetIndex();
             if (!action.shouldLoop() && (newIndex < 0 || newIndex >= spriteState.getSprites().size())) {
                 LOGGER.warn("SetSpriteIndexAction: Target index " + newIndex + " is out of bounds for non-looping sprite.");
                 return;
             }
             spriteState.setCurrentIndex(newIndex % spriteState.getSprites().size());
+            activeElement.setTexture(spriteState.getCurrentSprite());
         } else {
             LOGGER.error("SetSpriteIndexAction: No sprite animation state found for element: " + action.getElementId());
         }
@@ -162,19 +216,59 @@ public class AnimationManager {
 
     private static void handleStepSpriteIndex(StepSpriteIndexAction action) {
         SpriteState spriteState = spriteStates.get(action.getElementId());
-        if (spriteState != null) {
-            int newIndex = spriteState.getCurrentIndex() + action.getSteps();
-            if (action.shouldLoop()) {
-                newIndex = (newIndex + spriteState.getSprites().size()) % spriteState.getSprites().size();
-            } else if (newIndex < 0 || newIndex >= spriteState.getSprites().size()) {
-                LOGGER.warn("StepSpriteIndexAction: Stepping out of bounds for non-looping sprite.");
+        GuiElement activeElement = activeElements.get(action.getElementId());
+        if (spriteState != null && activeElement != null) {
+            int currentSpriteIndex = spriteState.getCurrentIndex();
+            int targetIndex = currentSpriteIndex + action.getSteps();
+
+            if (!action.shouldLoop() && (targetIndex < 0 || targetIndex >= spriteState.getSprites().size())) {
+                LOGGER.warn("StepSpriteAction: Stepping out of bounds for non-looping sprite.");
                 return;
             }
-            spriteState.setCurrentIndex(newIndex);
+
+            animatedStepStates.put(action.getElementId(), new AnimatedStepState(
+                    System.currentTimeMillis() - animationStartTime,
+                    currentSpriteIndex,
+                    targetIndex,
+                    action.getDuration(),
+                    action.shouldLoop(),
+                    spriteState.getSprites().size(),
+                    action.getSteps() // Pass the steps value
+            ));
         } else {
-            LOGGER.error("StepSpriteIndexAction: No sprite animation state found for element: " + action.getElementId());
+            LOGGER.error("StepSpriteAction: No sprite animation state or active element found for: " + action.getElementId());
         }
     }
+
+    private static class AnimatedStepState {
+        private final long startTime;
+        private final int startSpriteIndex;
+        private final int targetSpriteIndex;
+        private final long duration;
+        private final boolean loop;
+        private final int totalSprites;
+        private final int totalSteps;
+
+        public AnimatedStepState(long startTime, int startSpriteIndex, int targetSpriteIndex, long duration, boolean loop, int totalSprites, int totalSteps) {
+            this.startTime = startTime;
+            this.startSpriteIndex = startSpriteIndex;
+            this.targetSpriteIndex = targetSpriteIndex;
+            this.duration = duration;
+            this.loop = loop;
+            this.totalSprites = totalSprites;
+            this.totalSteps = totalSteps;
+        }
+
+        // Getters
+        public long getStartTime() { return startTime; }
+        public int getStartSpriteIndex() { return startSpriteIndex; }
+        public int getTargetSpriteIndex() { return targetSpriteIndex; }
+        public long getDuration() { return duration; }
+        public boolean shouldLoop() { return loop; }
+        public int getTotalSprites() { return totalSprites; }
+        public int getTotalSteps() { return totalSteps; }
+    }
+
 
     private static void handleStopSpriteAnimation(StopSpriteAnimationAction action) {
         spriteUpdateIntervals.remove(action.getElementId());
@@ -247,6 +341,9 @@ public class AnimationManager {
     private static void handleHideElement(HideElementAction action) {
         try {
             activeElements.remove(action.getElementId());
+            animatedStepStates.remove(action.getElementId());
+            spriteUpdateIntervals.remove(action.getElementId());
+            spriteStates.remove(action.getElementId());
         } catch (NullPointerException e) {
             return;
         } catch (Exception e) {

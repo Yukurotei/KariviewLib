@@ -6,10 +6,14 @@ public class StepSpriteIndexAction implements Action {
     @SerializedName("element_id")
     private String elementId;
 
+    @SerializedName("steps")
     private int steps;
 
     @SerializedName("loop")
     private boolean shouldLoop = true;
+
+    @SerializedName("duration")
+    private long duration;
 
     public String getElementId() {
         return elementId;
@@ -21,5 +25,9 @@ public class StepSpriteIndexAction implements Action {
 
     public boolean shouldLoop() {
         return shouldLoop;
+    }
+
+    public long getDuration() {
+        return duration;
     }
 }
