@@ -32,10 +32,16 @@ public class AnimationManager {
     private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
     private static final Map<String, ScaleState> scalingStates = new HashMap<>();
     private static final Map<String, FadeState> fadingStates = new HashMap<>();
+    private static final Map<String, MoveState> movingStates = new HashMap<>();
+    private static final Map<String, RotateState> rotatingStates = new HashMap<>();
 
     private record ScaleState(long startTime, double startScale, double targetScale, long duration, String easingType) {}
 
     private record FadeState(long startTime, float startOpacity, float targetOpacity, long duration, String easingType) {}
+
+    private record MoveState(long startTime, double startX, double startY, double targetX, double targetY, long duration, String easingType) {}
+
+    private record RotateState(long startTime, double startAngle, double targetAngle, long duration, String easingType) {}
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -45,6 +51,7 @@ public class AnimationManager {
         activeElements.clear();
         spriteStates.clear();
         spriteUpdateIntervals.clear();
+        rotatingStates.clear();
     }
 
     public static void playAnimation(String namespace, String animationId) {
@@ -74,10 +81,10 @@ public class AnimationManager {
                 return true; // Remove if element is no longer active
             }
 
-            long elapsedSinceStart = elapsed - state.getStartTime();
-            if (elapsedSinceStart >= state.getDuration()) {
+            long elapsedSinceStart = elapsed - state.startTime();
+            if (elapsedSinceStart >= state.duration()) {
                 // Animation is complete, set to final frame and remove state
-                int finalIndex = state.shouldLoop() ? (state.getTargetSpriteIndex() + state.getTotalSprites()) % state.getTotalSprites() : state.getTargetSpriteIndex();
+                int finalIndex = state.shouldLoop() ? (state.targetSpriteIndex() + state.totalSprites()) % state.totalSprites() : state.targetSpriteIndex();
                 activeElement.setTexture(spriteStates.get(elementId).getSprites().get(finalIndex));
                 spriteStates.get(elementId).setCurrentIndex(finalIndex);
                 return true; // Remove the state
@@ -138,6 +145,32 @@ public class AnimationManager {
             return false;
         });
 
+        movingStates.entrySet().removeIf(entry -> {
+            String elementId = entry.getKey();
+            MoveState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element == null) {
+                return true;
+            }
+
+            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
+            if (elapsedSinceStart >= state.duration()) {
+                element.setX(state.targetX());
+                element.setY(state.targetY());
+                return true;
+            }
+
+            double progress = (double) elapsedSinceStart / state.duration();
+            double easedProgress = Easing.getEasedProgress(state.easingType(), progress);
+
+            double newX = state.startX() + (state.targetX() - state.startX()) * easedProgress;
+            double newY = state.startY() + (state.targetY() - state.startY()) * easedProgress;
+
+            element.setX(newX);
+            element.setY(newY);
+
+            return false;
+        });
 
         // Loop through all active sprite animations and update them
         for (Map.Entry<String, Long> entry : spriteUpdateIntervals.entrySet()) {
@@ -178,21 +211,21 @@ public class AnimationManager {
     }
 
     private static int getNewIndex(AnimatedStepState state, double elapsedSinceStart) {
-        int totalSteps = state.getTotalSteps();
-        int currentStep = (int) (elapsedSinceStart / state.getDuration() * totalSteps);
+        int totalSteps = state.totalSteps();
+        int currentStep = (int) (elapsedSinceStart / state.duration() * totalSteps);
 
-        int direction = state.getTargetSpriteIndex() >= state.getStartSpriteIndex() ? 1 : -1;
-        if (state.shouldLoop() && state.getTargetSpriteIndex() < state.getStartSpriteIndex()) {
+        int direction = state.targetSpriteIndex() >= state.startSpriteIndex() ? 1 : -1;
+        if (state.shouldLoop() && state.targetSpriteIndex() < state.startSpriteIndex()) {
             direction = 1;
         }
 
         int newIndex;
         if (state.shouldLoop()) {
-            newIndex = (state.getStartSpriteIndex() + currentStep) % state.getTotalSprites();
+            newIndex = (state.startSpriteIndex() + currentStep) % state.totalSprites();
         } else {
-            newIndex = state.getStartSpriteIndex() + (currentStep * direction);
-            if ((direction > 0 && newIndex > state.getTargetSpriteIndex()) || (direction < 0 && newIndex < state.getTargetSpriteIndex())) {
-                newIndex = state.getTargetSpriteIndex();
+            newIndex = state.startSpriteIndex() + (currentStep * direction);
+            if ((direction > 0 && newIndex > state.targetSpriteIndex()) || (direction < 0 && newIndex < state.targetSpriteIndex())) {
+                newIndex = state.targetSpriteIndex();
             }
         }
         return newIndex;
@@ -214,7 +247,8 @@ public class AnimationManager {
         spriteStates.clear();
         animatedStepStates.clear();
         scalingStates.clear();
-        //fadingStates.clear();
+        fadingStates.clear();
+        movingStates.clear();
         spriteUpdateIntervals.clear();
 
         AnimationLoader.loadAllAnimations();
@@ -245,7 +279,26 @@ public class AnimationManager {
                 handleStopSpriteAnimation((StopSpriteAnimationAction) action);
             } else if (action instanceof ScaleAction) {
                 handleScaleAction((ScaleAction) action);
+            } else if (action instanceof MoveAction) {
+                handleMoveAction((MoveAction) action);
             }
+        }
+    }
+
+    private static void handleMoveAction(MoveAction action) {
+        GuiElement element = activeElements.get(action.getElementId());
+        if (element != null) {
+            movingStates.put(action.getElementId(), new MoveState(
+                    System.currentTimeMillis() - animationStartTime,
+                    element.getX(),
+                    element.getY(),
+                    action.getTargetX(),
+                    action.getTargetY(),
+                    action.getDuration(),
+                    action.getEasingType()
+            ));
+        } else {
+            LOGGER.error("MoveAction: No active element found for id: {}", action.getElementId());
         }
     }
 
@@ -322,34 +375,12 @@ public class AnimationManager {
         }
     }
 
-    private static class AnimatedStepState {
-        private final long startTime;
-        private final int startSpriteIndex;
-        private final int targetSpriteIndex;
-        private final long duration;
-        private final boolean loop;
-        private final int totalSprites;
-        private final int totalSteps;
-
-        public AnimatedStepState(long startTime, int startSpriteIndex, int targetSpriteIndex, long duration, boolean loop, int totalSprites, int totalSteps) {
-            this.startTime = startTime;
-            this.startSpriteIndex = startSpriteIndex;
-            this.targetSpriteIndex = targetSpriteIndex;
-            this.duration = duration;
-            this.loop = loop;
-            this.totalSprites = totalSprites;
-            this.totalSteps = totalSteps;
+    private record AnimatedStepState(long startTime, int startSpriteIndex, int targetSpriteIndex, long duration,
+                                     boolean loop, int totalSprites, int totalSteps) {
+        public boolean shouldLoop() {
+            return loop;
         }
-
-        // Getters
-        public long getStartTime() { return startTime; }
-        public int getStartSpriteIndex() { return startSpriteIndex; }
-        public int getTargetSpriteIndex() { return targetSpriteIndex; }
-        public long getDuration() { return duration; }
-        public boolean shouldLoop() { return loop; }
-        public int getTotalSprites() { return totalSprites; }
-        public int getTotalSteps() { return totalSteps; }
-    }
+        }
 
 
     private static void handleStopSpriteAnimation(StopSpriteAnimationAction action) {

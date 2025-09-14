@@ -32,12 +32,12 @@ public class AnimationLoader {
                 .registerSubtype(ShowVanillaHudAction.class, "show_vanilla_hud")
                 .registerSubtype(HideVanillaHudAction.class, "hide_vanilla_hud")
                 .registerSubtype(StopAllSoundAction.class, "stop_all_sounds")
-                .registerSubtype(MoveElementAction.class, "move_element")
                 .registerSubtype(UpdateSpriteAction.class, "update_sprite")
                 .registerSubtype(SetSpriteIndexAction.class, "set_sprite_index")
                 .registerSubtype(StepSpriteIndexAction.class, "step_sprite_index")
                 .registerSubtype(StopSpriteAnimationAction.class, "stop_sprite_animation")
-                .registerSubtype(ScaleAction.class, "scale");
+                .registerSubtype(ScaleAction.class, "scale_element")
+                .registerSubtype(MoveAction.class, "move_element");
 
         GSON = new GsonBuilder()
                 .registerTypeAdapterFactory(actionAdapter)

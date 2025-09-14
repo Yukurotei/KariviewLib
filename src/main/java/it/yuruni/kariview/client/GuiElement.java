@@ -2,15 +2,14 @@ package it.yuruni.kariview.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
-import it.yuruni.kariview.Kariview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 
 public class GuiElement {
     private ResourceLocation texture;
-    private final double x;
-    private final double y;
+    private double x;
+    private double y;
     private final double width;
     private final double height;
     private final int textureWidth;
@@ -46,6 +45,22 @@ public class GuiElement {
 
     public float getOpacity() {
         return opacity;
+    }
+
+    public void setX(double newX) {
+        this.x = newX;
+    }
+
+    public double getX() {
+        return this.x;
+    }
+
+    public void setY(double newY) {
+        this.y = newY;
+    }
+
+    public double getY() {
+        return this.y;
     }
 
     public void render(GuiGraphics guiGraphics) {
