@@ -62,9 +62,9 @@ public class FFT {
                     float t_i = u_r * b_i + u_i * b_r;
 
                     // Butterfly
-                    data[i0]     = a_r + t_r;
+                    data[i0] = a_r + t_r;
                     data[i0 + 1] = a_i + t_i;
-                    data[i1]     = a_r - t_r;
+                    data[i1] = a_r - t_r;
                     data[i1 + 1] = a_i - t_i;
 
                     // Update twiddle

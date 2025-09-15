@@ -1,0 +1,141 @@
+{
+  "id": "template_animation",
+  "elements": [
+    {
+      "element_id": "example_image",
+      "texture_path": "example.png"
+    },
+    {
+      "element_id": "animated_sprite",
+      "texture_path_pattern": "megaknight*.png"
+    }
+  ],
+  "keyframes": [
+    {
+      "timestamp": 0,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "animated_sprite",
+          "x": 0.1,
+          "y": 0.1,
+          "texture_width": 64,
+          "texture_height": 64,
+          "width": 0.25,
+          "height": 0.25,
+          "start_opacity": 1,
+          "target_opacity": 0.2,
+          "fade_duration": 1000,
+          "fade_easing_type": "linear"
+        },
+        {
+          "type": "show_element",
+          "element_id": "example_image",
+          "x": 0.5,
+          "y": 0.5,
+          "texture_width": 2048,
+          "texture_height": 1152,
+          "width": 0.3,
+          "height": 0.17
+        },
+        {
+          "type": "update_sprite",
+          "element_id": "animated_sprite",
+          "update_interval": 100
+        },
+        {
+          "type": "move_element",
+          "element_id": "animated_sprite",
+          "target_x": 0.7,
+          "target_y": 0.7,
+          "duration": 5000,
+          "easing_type": "easeInOutQuad"
+        },
+        {
+          "type": "rotate_element",
+          "element_id": "animated_sprite",
+          "target_angle": 360,
+          "duration": 10000,
+          "easing_type": "easeInOutQuad"
+        },
+        {
+          "type": "play_sound",
+          "sound_id": "example.ogg",
+          "volume": 0.5
+        }
+      ]
+    },
+    {
+      "timestamp": 3000,
+      "actions": [
+        {
+          "type": "stop_sprite_animation",
+          "element_id": "animated_sprite"
+        }
+      ]
+    },
+    {
+      "timestamp": 4000,
+      "actions": [
+        {
+          "type": "set_sprite_index",
+          "element_id": "animated_sprite",
+          "target_index": 1,
+          "loop": false
+        }
+      ]
+    },
+    {
+      "timestamp": 6000,
+      "actions": [
+        {
+          "type": "step_sprite_index",
+          "element_id": "animated_sprite",
+          "steps": 5,
+          "duration": 1000,
+          "loop": true
+        },
+        {
+          "type": "scale_element",
+          "element_id": "animated_sprite",
+          "target_scale": 3,
+          "duration": 1000,
+          "easing_type": "linear"
+        }
+      ]
+    },
+    {
+      "timestamp": 9000,
+      "actions": [
+        {
+          "type": "scale_element",
+          "element_id": "animated_sprite",
+          "target_scale": 1,
+          "duration": 1000,
+          "easing_type": "easeInOutQuad"
+        }
+      ]
+    },
+    {
+      "timestamp": 11000,
+      "actions": [
+        {
+          "type": "hide_element",
+          "element_id": "animated_sprite"
+        },
+        {
+          "type": "hide_element",
+          "element_id": "example_image"
+        }
+      ]
+    },
+    {
+      "timestamp": 240000,
+      "actions": [
+        {
+          "type": "stop_all_sounds"
+        }
+      ]
+    }
+  ]
+}
