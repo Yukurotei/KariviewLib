@@ -288,6 +288,11 @@ public class AnimationManager {
             LOGGER.info(action.toString());
             if (action instanceof ShowElementAction) {
                 handleShowElement((ShowElementAction) action);
+                /*TO CALCULATE WIDTH AND HEIGHT FROM ACTUAL NUMBER TO PERCENTAGE
+                    - Find out height to width ratio (height / width)
+                    - width: percentage of the screen you want to take up (e.g. 50% is 0.5, on and on)
+                    - height: multiply the width value by the ratio
+                 */
             } else if (action instanceof HideElementAction) {
                 handleHideElement((HideElementAction) action);
             } else if (action instanceof PlaySoundAction) {
