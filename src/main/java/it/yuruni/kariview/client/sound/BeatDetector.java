@@ -1,0 +1,130 @@
+package it.yuruni.kariview.client.sound;
+
+import it.yuruni.kariview.client.animation.RawAudio;
+import it.yuruni.kariview.client.data.AudioData;
+import net.minecraft.client.Minecraft;
+import net.minecraft.network.chat.Component;
+import net.minecraftforge.event.TickEvent;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
+import net.minecraftforge.fml.common.Mod;
+
+import java.nio.ShortBuffer;
+
+
+@Mod.EventBusSubscriber
+public class BeatDetector {
+    private static final int BUFFER_SIZE = 1024;
+    private static final int HISTORY_SIZE = 60; // For a 1-second rolling average at 60 FPS
+    private final FFT fft;
+    private final float[] energyHistory = new float[HISTORY_SIZE];
+    private int historyIndex = 0;
+
+    public BeatDetector() {
+        this.fft = new FFT(BUFFER_SIZE);
+    }
+
+    @SubscribeEvent
+    public void onClientTick(TickEvent.ClientTickEvent event) {
+        if (event.phase == TickEvent.Phase.START) {
+            update();
+        }
+    }
+
+    public void update() {
+        for (int source : RawAudio.activeSources) {
+            AudioData data = RawAudio.getAudioData(source);
+            if (data == null) {
+                RawAudio.cleanupSource(source);
+                continue;
+            }
+
+            int playbackOffset = RawAudio.getPlaybackOffset(source);
+
+            // AVOID THE CRASH: Only analyze if we have at least a full buffer of audio to look at.
+            if (playbackOffset < BUFFER_SIZE) {
+                continue;
+            }
+
+            float[] audioChunk = extractAudioChunk(data, playbackOffset);
+
+            boolean beatDetected = analyzeForBeats(audioChunk);
+            if (beatDetected) {
+                assert Minecraft.getInstance().player != null;
+                Minecraft.getInstance().player.sendSystemMessage(Component.literal("Beat detected! [" + Math.random() + "]"));
+            }
+        }
+    }
+
+    /**
+     * Extracts a chunk of audio data from the ShortBuffer and converts it to a float array,
+     * ensuring the array is always of BUFFER_SIZE.
+     * @param audioData The AudioData object containing the ShortBuffer.
+     * @param playbackOffset The current playback offset from the audio source.
+     * @return A float array containing the audio samples, padded with zeros if necessary.
+     */
+    private float[] extractAudioChunk(AudioData audioData, int playbackOffset) {
+        ShortBuffer pcm = audioData.getPcm();
+        int channels = audioData.getChannels();
+        int totalSamples = pcm.capacity() / channels;
+
+        float[] audioChunk = new float[BUFFER_SIZE];
+
+        // Calculate the starting index in the ShortBuffer
+        int startSample = playbackOffset - BUFFER_SIZE;
+        startSample = Math.max(0, startSample);
+
+        // Copy the samples from the ShortBuffer
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            int currentSampleIndex = startSample + i;
+            if (currentSampleIndex < totalSamples) {
+                // Get the value from the buffer, accounting for channels
+                // We'll use the left channel for simplicity with stereo audio
+                int bufferIndex = currentSampleIndex * channels;
+                short sample = pcm.get(bufferIndex);
+                audioChunk[i] = ((float) sample) / 32768.0f;
+            } else {
+                // Pad with zeros if we've reached the end of the audio
+                audioChunk[i] = 0.0f;
+            }
+        }
+
+        return audioChunk;
+    }
+
+    private boolean analyzeForBeats(float[] data) {
+        System.out.printf("Frame[0]=%.4f Frame[1]=%.4f Frame[2]=%.4f%n",
+                data[0], data[1], data[2]);
+        float[] fftData = new float[BUFFER_SIZE * 2];
+        for (int i = 0; i < BUFFER_SIZE; i++) {
+            fftData[i * 2] = data[i];
+            fftData[i * 2 + 1] = 0;
+        }
+
+        fft.transform(fftData);
+
+        int sampleRate = 44100;
+        float bandEnergy = 0;
+        for (int i = 0; i < BUFFER_SIZE / 2; i++) {
+            float frequency = (float) i * sampleRate / BUFFER_SIZE;
+            if (frequency >= 60 && frequency <= 120) {
+                float real = fftData[i * 2];
+                float imag = fftData[i * 2 + 1];
+                bandEnergy += real * real + imag * imag;
+            }
+        }
+
+        float averageEnergy = 0;
+        for (float energy : energyHistory) {
+            averageEnergy += energy;
+        }
+        averageEnergy /= HISTORY_SIZE;
+
+        float sensitivity = 1.2f;
+        boolean beat = bandEnergy > averageEnergy * sensitivity;
+
+        energyHistory[historyIndex] = bandEnergy;
+        historyIndex = (historyIndex + 1) % HISTORY_SIZE;
+
+        return beat;
+    }
+}

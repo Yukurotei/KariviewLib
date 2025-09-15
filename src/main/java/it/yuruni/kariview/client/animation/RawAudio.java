@@ -1,9 +1,12 @@
 package it.yuruni.kariview.client.animation;
 
+import it.yuruni.kariview.client.data.AudioData;
+import net.minecraftforge.fml.common.Mod;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.lwjgl.BufferUtils;
 import org.lwjgl.openal.AL10;
+import org.lwjgl.openal.AL11;
 import org.lwjgl.stb.STBVorbis;
 import org.lwjgl.stb.STBVorbisInfo;
 
@@ -11,10 +14,14 @@ import java.nio.IntBuffer;
 import java.nio.ShortBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
+@Mod.EventBusSubscriber(bus = Mod.EventBusSubscriber.Bus.FORGE)
 public class RawAudio {
     private static final Logger LOGGER = LogManager.getLogger();
     public static final List<Integer> activeSources = new ArrayList<>();
+    private static final Map<Integer, AudioData> sourceDataMap = new ConcurrentHashMap<>();
 
     public static void playOgg(String path, float volume) {
         try (STBVorbisInfo info = STBVorbisInfo.malloc()) {
@@ -32,6 +39,7 @@ public class RawAudio {
             int lengthSamples = STBVorbis.stb_vorbis_stream_length_in_samples(decoder);
             ShortBuffer pcm = BufferUtils.createShortBuffer(lengthSamples * channels);
             STBVorbis.stb_vorbis_get_samples_short_interleaved(decoder, channels, pcm);
+            pcm.rewind();
 
             int buffer = AL10.alGenBuffers();
             AL10.alBufferData(buffer, channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
@@ -42,9 +50,11 @@ public class RawAudio {
             AL10.alSourcef(source, AL10.AL_GAIN, volume);
             AL10.alSourcePlay(source);
 
-            activeSources.add(source); // Add the source to our list for cleanup
+            activeSources.add(source);
+            sourceDataMap.put(source, new AudioData(pcm, sampleRate, channels));
 
-            STBVorbis.stb_vorbis_close(decoder);
+            // We do not close the decoder here as the stream may still be playing.
+            // A separate cleanup mechanism is needed.
         }
     }
 
@@ -56,6 +66,19 @@ public class RawAudio {
             }
         }
         activeSources.clear();
+        sourceDataMap.clear();
+    }
+
+    public static AudioData getAudioData(int source) {
+        return sourceDataMap.get(source);
+    }
+
+    public static int getPlaybackOffset(int source) {
+        return AL10.alGetSourcei(source, AL11.AL_SAMPLE_OFFSET);
+    }
+
+    public static void cleanupSource(int source) {
+        activeSources.remove((Integer) source);
+        sourceDataMap.remove(source);
     }
 }
-

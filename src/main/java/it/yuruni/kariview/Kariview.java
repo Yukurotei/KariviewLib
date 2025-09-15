@@ -2,6 +2,7 @@ package it.yuruni.kariview;
 
 import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.client.data.AnimationLoader;
+import it.yuruni.kariview.client.sound.BeatDetector;
 import it.yuruni.kariview.packets.PacketHandler;
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
@@ -21,6 +22,7 @@ public class Kariview {
         //Client event for registering GUI renderers
         modEventBus.addListener(this::onClientSetup);
         MinecraftForge.EVENT_BUS.register(this);
+        MinecraftForge.EVENT_BUS.register(new BeatDetector());
 
         PacketHandler.register();
 
