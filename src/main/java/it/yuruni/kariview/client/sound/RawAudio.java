@@ -1,4 +1,4 @@
-package it.yuruni.kariview.client.animation;
+package it.yuruni.kariview.client.sound;
 
 import it.yuruni.kariview.client.data.AudioData;
 import net.minecraftforge.fml.common.Mod;
