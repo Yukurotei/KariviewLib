@@ -71,7 +71,7 @@ public class AnimationManager {
 
         long elapsed = System.currentTimeMillis() - animationStartTime;
 
-        //Check if step animating is finished
+        //Update step elements
         animatedStepStates.entrySet().removeIf(entry -> {
             String elementId = entry.getKey();
             AnimatedStepState state = entry.getValue();
@@ -99,7 +99,7 @@ public class AnimationManager {
             return false;
         });
 
-        //Check if scaling animation is finished
+        //Update scaling elements
         scalingStates.entrySet().removeIf(entry -> {
             String elementId = entry.getKey();
             ScaleState state = entry.getValue();
@@ -122,7 +122,7 @@ public class AnimationManager {
             return false;
         });
 
-        //Check if fading is finished
+        //Update fading elements
         fadingStates.entrySet().removeIf(entry -> {
             String elementId = entry.getKey();
             FadeState state = entry.getValue();
@@ -145,6 +145,7 @@ public class AnimationManager {
             return false;
         });
 
+        //Update moving elements
         movingStates.entrySet().removeIf(entry -> {
             String elementId = entry.getKey();
             MoveState state = entry.getValue();
@@ -168,6 +169,30 @@ public class AnimationManager {
 
             element.setX(newX);
             element.setY(newY);
+
+            return false;
+        });
+
+        //Update rotating elements
+        rotatingStates.entrySet().removeIf(entry -> {
+            String elementId = entry.getKey();
+            RotateState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element == null) {
+                return true;
+            }
+
+            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
+            if (elapsedSinceStart >= state.duration()) {
+                element.setAngle(state.targetAngle());
+                return true;
+            }
+
+            double progress = (double) elapsedSinceStart / state.duration();
+            double easedProgress = Easing.getEasedProgress(state.easingType(), progress);
+
+            double newAngle = state.startAngle() + (state.targetAngle() - state.startAngle()) * easedProgress;
+            element.setAngle(newAngle);
 
             return false;
         });
@@ -281,7 +306,24 @@ public class AnimationManager {
                 handleScaleAction((ScaleAction) action);
             } else if (action instanceof MoveAction) {
                 handleMoveAction((MoveAction) action);
+            } else if (action instanceof RotateAction) {
+                handleRotateAction((RotateAction) action);
             }
+        }
+    }
+
+    private static void handleRotateAction(RotateAction action) {
+        GuiElement element = activeElements.get(action.getElementId());
+        if (element != null) {
+            rotatingStates.put(action.getElementId(), new RotateState(
+                    System.currentTimeMillis() - animationStartTime,
+                    element.getAngle(),
+                    action.getTargetAngle(),
+                    action.getDuration(),
+                    action.getEasingType()
+            ));
+        } else {
+            LOGGER.error("RotateAction: No active element found for id: {}", action.getElementId());
         }
     }
 

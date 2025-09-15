@@ -2,9 +2,11 @@ package it.yuruni.kariview.client;
 
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.math.Axis;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
+import org.joml.Vector3f;
 
 public class GuiElement {
     private ResourceLocation texture;
@@ -16,6 +18,7 @@ public class GuiElement {
     private final int textureHeight;
     private double scale = 1.0;
     private float opacity = 1.0f;
+    private double angle = 0.0;
 
     public GuiElement(ResourceLocation texture, double x, double y, double width, double height, int textureWidth, int textureHeight) {
         this.texture = texture;
@@ -63,6 +66,14 @@ public class GuiElement {
         return this.y;
     }
 
+    public void setAngle(double newAngle) {
+        this.angle = newAngle;
+    }
+
+    public double getAngle() {
+        return this.angle;
+    }
+
     public void render(GuiGraphics guiGraphics) {
         int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
@@ -89,10 +100,14 @@ public class GuiElement {
         int drawX = initialX - (scaledWidth - initialWidth) / 2;
         int drawY = initialY - (scaledHeight - initialHeight) / 2;
 
-        RenderSystem.enableBlend();
-        RenderSystem.blendFunc(GlStateManager.SourceFactor.SRC_ALPHA, GlStateManager.DestFactor.ONE_MINUS_SRC_ALPHA);
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, this.opacity);
+        guiGraphics.pose().pushPose();
 
+        // Translate to the center of the element, rotate, then translate back
+        guiGraphics.pose().translate(drawX + scaledWidth / 2.0, drawY + scaledHeight / 2.0, 0);
+        guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees((float) this.angle));
+        guiGraphics.pose().translate(-(drawX + scaledWidth / 2.0), -(drawY + scaledHeight / 2.0), 0);
+
+        // Render
         guiGraphics.blit(
                 texture,
                 drawX, drawY,
@@ -102,8 +117,7 @@ public class GuiElement {
                 textureWidth, textureHeight
         );
 
-        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
-        RenderSystem.disableBlend();
+        guiGraphics.pose().popPose();
     }
 
 }
