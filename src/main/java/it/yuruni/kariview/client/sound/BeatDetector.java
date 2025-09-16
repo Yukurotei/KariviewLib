@@ -62,7 +62,7 @@ public class BeatDetector {
 
                 boolean beatDetected = analyzeForElement(audioChunk, element);
                 if (beatDetected) {
-                    Minecraft.getInstance().player.sendSystemMessage(Component.literal("Beat detected for element: " + element.elementId + " at " + System.currentTimeMillis()));
+                    //Minecraft.getInstance().player.sendSystemMessage(Component.literal("Beat detected for element: " + element.elementId + " at " + System.currentTimeMillis()));
                 }
             }
         }

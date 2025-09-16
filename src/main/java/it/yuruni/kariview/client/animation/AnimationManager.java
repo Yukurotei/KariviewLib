@@ -35,6 +35,7 @@ public class AnimationManager {
     private static final Map<String, FadeState> fadingStates = new HashMap<>();
     private static final Map<String, MoveState> movingStates = new HashMap<>();
     private static final Map<String, RotateState> rotatingStates = new HashMap<>();
+    private static final Map<String, ExtendState> extendingStates = new HashMap<>();
 
     private record ScaleState(long startTime, double startScale, double targetScale, long duration, String easingType) {}
 
@@ -43,6 +44,8 @@ public class AnimationManager {
     private record MoveState(long startTime, double startX, double startY, double targetX, double targetY, long duration, String easingType) {}
 
     private record RotateState(long startTime, double startAngle, double targetAngle, long duration, String easingType) {}
+
+    private record ExtendState(long startTime, double startX, double startY, double startWidth, double startHeight, double targetValue, String direction, long duration) {}
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -198,6 +201,53 @@ public class AnimationManager {
             return false;
         });
 
+        //Update extending elements
+        extendingStates.entrySet().removeIf(entry -> {
+            String elementId = entry.getKey();
+            ExtendState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element == null) {
+                return true;
+            }
+
+            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
+            if (elapsedSinceStart >= state.duration()) {
+                switch (state.direction()) {
+                    case "LEFT":
+                    case "RIGHT":
+                        element.setWidth(state.startWidth() + state.targetValue());
+                        break;
+                    case "UP":
+                    case "DOWN":
+                        element.setHeight(state.startHeight() + state.targetValue());
+                        break;
+                }
+                return true;
+            }
+
+            double progress = (double) elapsedSinceStart / state.duration();
+            double currentAmount = progress * state.targetValue();
+
+            switch (state.direction()) {
+                case "RIGHT":
+                    element.setWidth(state.startWidth() + currentAmount);
+                    LOGGER.info("Setting width");
+                    break;
+                case "LEFT":
+                    element.setWidth(state.startWidth() + currentAmount);
+                    element.setX(state.startX() - currentAmount);
+                    break;
+                case "DOWN":
+                    element.setHeight(state.startHeight() + currentAmount);
+                    break;
+                case "UP":
+                    element.setHeight(state.startHeight() + currentAmount);
+                    element.setY(state.startY() - currentAmount);
+                    break;
+            }
+            return false;
+        });
+
         // Loop through all active sprite animations and update them
         for (Map.Entry<String, Long> entry : spriteUpdateIntervals.entrySet()) {
             String elementId = entry.getKey();
@@ -314,7 +364,27 @@ public class AnimationManager {
                 handleMoveAction((MoveAction) action);
             } else if (action instanceof RotateAction) {
                 handleRotateAction((RotateAction) action);
+            } else if (action instanceof ExtendAction) {
+                handleExtendAction((ExtendAction) action);
             }
+        }
+    }
+
+    private static void handleExtendAction(ExtendAction action) {
+        GuiElement element = activeElements.get(action.getElementId());
+        if (element != null) {
+            extendingStates.put(action.getElementId(), new ExtendState(
+                    System.currentTimeMillis() - animationStartTime,
+                    element.getX(),
+                    element.getY(),
+                    element.getWidth(),
+                    element.getHeight(),
+                    action.getAmount(),
+                    action.getDirection(),
+                    action.getDuration()
+            ));
+        } else {
+            LOGGER.error("ExtendAction: No active element found for id: {}", action.getElementId());
         }
     }
 
@@ -519,7 +589,6 @@ public class AnimationManager {
             spriteUpdateIntervals.remove(action.getElementId());
             spriteStates.remove(action.getElementId());
         } catch (NullPointerException e) {
-            return;
         } catch (Exception e) {
             LOGGER.error("Failed to hide element: {}", action.getElementId());
             e.printStackTrace();

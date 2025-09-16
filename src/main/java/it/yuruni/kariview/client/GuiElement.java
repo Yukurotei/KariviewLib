@@ -12,8 +12,8 @@ public class GuiElement {
     private ResourceLocation texture;
     private double x;
     private double y;
-    private final double width;
-    private final double height;
+    private double width;
+    private double height;
     private final int textureWidth;
     private final int textureHeight;
     private double scale = 1.0;
@@ -72,6 +72,22 @@ public class GuiElement {
 
     public double getAngle() {
         return this.angle;
+    }
+
+    public double getWidth() {
+        return width;
+    }
+
+    public double getHeight() {
+        return height;
+    }
+
+    public void setWidth(double width) {
+        this.width = width;
+    }
+
+    public void setHeight(double height) {
+        this.height = height;
     }
 
     public void render(GuiGraphics guiGraphics) {
