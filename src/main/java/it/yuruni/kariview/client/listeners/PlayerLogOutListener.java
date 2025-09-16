@@ -1,9 +1,7 @@
 package it.yuruni.kariview.client.listeners;
 
 import it.yuruni.kariview.Kariview;
-import it.yuruni.kariview.client.KariviewRenderer;
-import it.yuruni.kariview.client.animation.AnimationManager;
-import it.yuruni.kariview.client.animation.RawAudio;
+import it.yuruni.kariview.client.sound.RawAudio;
 import net.minecraftforge.client.event.ClientPlayerNetworkEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;

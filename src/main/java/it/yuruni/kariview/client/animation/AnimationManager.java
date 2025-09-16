@@ -8,6 +8,7 @@ import it.yuruni.kariview.client.data.AnimationLoader;
 import it.yuruni.kariview.client.data.Keyframe;
 import it.yuruni.kariview.client.data.actions.*;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
+import it.yuruni.kariview.client.sound.RawAudio;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
