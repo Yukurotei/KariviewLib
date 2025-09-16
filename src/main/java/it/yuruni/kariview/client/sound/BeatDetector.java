@@ -169,7 +169,7 @@ public class BeatDetector {
         float bandEnergy = 0;
         for (int i = 0; i < BUFFER_SIZE / 2; i++) {
             float frequency = (float) i * sampleRate / BUFFER_SIZE;
-            if (frequency >= 60 && frequency <= 120) {
+            if (frequency >= 20 && frequency <= 100) {
                 float real = fftData[i * 2];
                 float imag = fftData[i * 2 + 1];
                 bandEnergy += real * real + imag * imag;

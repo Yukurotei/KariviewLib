@@ -61,9 +61,10 @@
         {
           "type": "extend_element",
           "element_id": "animated_sprite",
-          "amount": 0.2,
+          "amount": 5,
           "duration": 5000,
-          "direction": "RIGHT"
+          "direction": "RIGHT",
+          "easing_type": "linear"
         },
         {
           "type": "play_sound",

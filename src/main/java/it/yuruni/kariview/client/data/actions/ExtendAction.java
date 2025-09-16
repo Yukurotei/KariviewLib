@@ -8,6 +8,8 @@ public class ExtendAction implements Action {
     private double amount;
     private long duration;
     private String direction;
+    @SerializedName("easing_type")
+    private String easingType;
 
     public String getElementId() {
         return elementId;
@@ -23,5 +25,9 @@ public class ExtendAction implements Action {
 
     public String getDirection() {
         return direction.toUpperCase();
+    }
+
+    public String getEasingType() {
+        return easingType;
     }
 }

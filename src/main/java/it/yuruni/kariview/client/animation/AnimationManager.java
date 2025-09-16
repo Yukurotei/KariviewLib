@@ -35,17 +35,14 @@ public class AnimationManager {
     private static final Map<String, FadeState> fadingStates = new HashMap<>();
     private static final Map<String, MoveState> movingStates = new HashMap<>();
     private static final Map<String, RotateState> rotatingStates = new HashMap<>();
-    private static final Map<String, ExtendState> extendingStates = new HashMap<>();
 
-    private record ScaleState(long startTime, double startScale, double targetScale, long duration, String easingType) {}
+    private record ScaleState(long startTime, double startXScale, double startYScale, double targetXScale, double targetYScale, long duration, String easingType) {}
 
     private record FadeState(long startTime, float startOpacity, float targetOpacity, long duration, String easingType) {}
 
     private record MoveState(long startTime, double startX, double startY, double targetX, double targetY, long duration, String easingType) {}
 
     private record RotateState(long startTime, double startAngle, double targetAngle, long duration, String easingType) {}
-
-    private record ExtendState(long startTime, double startX, double startY, double startWidth, double startHeight, double targetValue, String direction, long duration) {}
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -114,14 +111,17 @@ public class AnimationManager {
 
             long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
             if (elapsedSinceStart >= state.duration()) {
-                element.setScale(state.targetScale());
+                element.setXScale(state.targetXScale());
+                element.setYScale(state.targetYScale());
                 return true;
             }
 
             double progress = (double) elapsedSinceStart / state.duration();
-            double easedProgress = Easing.getEasedProgress(state.easingType(), progress); //Eased progress
-            double newScale = state.startScale() + (state.targetScale() - state.startScale()) * easedProgress; // Use eased progress
-            element.setScale(newScale);
+            double easedProgress = Easing.getEasedProgress(state.easingType(), progress);
+            double newXScale = state.startXScale() + (state.targetXScale() - state.startXScale()) * easedProgress;
+            double newYScale = state.startYScale() + (state.targetYScale() - state.startYScale()) * easedProgress;
+            element.setXScale(newXScale);
+            element.setYScale(newYScale);
 
             return false;
         });
@@ -198,53 +198,6 @@ public class AnimationManager {
             double newAngle = state.startAngle() + (state.targetAngle() - state.startAngle()) * easedProgress;
             element.setAngle(newAngle);
 
-            return false;
-        });
-
-        //Update extending elements
-        extendingStates.entrySet().removeIf(entry -> {
-            String elementId = entry.getKey();
-            ExtendState state = entry.getValue();
-            GuiElement element = activeElements.get(elementId);
-            if (element == null) {
-                return true;
-            }
-
-            long elapsedSinceStart = (System.currentTimeMillis() - animationStartTime) - state.startTime();
-            if (elapsedSinceStart >= state.duration()) {
-                switch (state.direction()) {
-                    case "LEFT":
-                    case "RIGHT":
-                        element.setWidth(state.startWidth() + state.targetValue());
-                        break;
-                    case "UP":
-                    case "DOWN":
-                        element.setHeight(state.startHeight() + state.targetValue());
-                        break;
-                }
-                return true;
-            }
-
-            double progress = (double) elapsedSinceStart / state.duration();
-            double currentAmount = progress * state.targetValue();
-
-            switch (state.direction()) {
-                case "RIGHT":
-                    element.setWidth(state.startWidth() + currentAmount);
-                    LOGGER.info("Setting width");
-                    break;
-                case "LEFT":
-                    element.setWidth(state.startWidth() + currentAmount);
-                    element.setX(state.startX() - currentAmount);
-                    break;
-                case "DOWN":
-                    element.setHeight(state.startHeight() + currentAmount);
-                    break;
-                case "UP":
-                    element.setHeight(state.startHeight() + currentAmount);
-                    element.setY(state.startY() - currentAmount);
-                    break;
-            }
             return false;
         });
 
@@ -373,15 +326,28 @@ public class AnimationManager {
     private static void handleExtendAction(ExtendAction action) {
         GuiElement element = activeElements.get(action.getElementId());
         if (element != null) {
-            extendingStates.put(action.getElementId(), new ExtendState(
+            double targetX = element.getXScale();
+            double targetY = element.getYScale();
+
+            switch (action.getDirection()) {
+                case "LEFT":
+                case "RIGHT":
+                    targetX = action.getAmount();
+                    break;
+                case "UP":
+                case "DOWN":
+                    targetY = action.getAmount();
+                    break;
+            }
+
+            scalingStates.put(action.getElementId(), new ScaleState(
                     System.currentTimeMillis() - animationStartTime,
-                    element.getX(),
-                    element.getY(),
-                    element.getWidth(),
-                    element.getHeight(),
-                    action.getAmount(),
-                    action.getDirection(),
-                    action.getDuration()
+                    element.getXScale(),
+                    element.getYScale(),
+                    targetX,
+                    targetY,
+                    action.getDuration(),
+                    action.getEasingType()
             ));
         } else {
             LOGGER.error("ExtendAction: No active element found for id: {}", action.getElementId());
@@ -425,7 +391,9 @@ public class AnimationManager {
         if (element != null) {
             scalingStates.put(action.getElementId(), new ScaleState(
                     System.currentTimeMillis() - animationStartTime,
-                    element.getScale(),
+                    element.getXScale(),
+                    element.getYScale(),
+                    action.getTargetScale(),
                     action.getTargetScale(),
                     action.getDuration(),
                     action.getEasingType()

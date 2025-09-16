@@ -3,6 +3,7 @@ package it.yuruni.kariview.client;
 import com.mojang.blaze3d.platform.GlStateManager;
 import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.math.Axis;
+import it.yuruni.kariview.Kariview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
@@ -16,9 +17,10 @@ public class GuiElement {
     private double height;
     private final int textureWidth;
     private final int textureHeight;
-    private double scale = 1.0;
     private float opacity = 1.0f;
     private double angle = 0.0;
+    private double xScale = 1.0;
+    private double yScale = 1.0;
 
     public GuiElement(ResourceLocation texture, double x, double y, double width, double height, int textureWidth, int textureHeight) {
         this.texture = texture;
@@ -32,14 +34,6 @@ public class GuiElement {
 
     public void setTexture(ResourceLocation newTexture) {
         this.texture = newTexture;
-    }
-
-    public void setScale(double newScale) {
-        this.scale = newScale;
-    }
-
-    public double getScale() {
-        return this.scale;
     }
 
     public void setOpacity(float opacity) {
@@ -90,19 +84,35 @@ public class GuiElement {
         this.height = height;
     }
 
+    public void setXScale(double newScale) {
+        this.xScale = newScale;
+    }
+
+    public double getXScale() {
+        return this.xScale;
+    }
+
+    public void setYScale(double newScale) {
+        this.yScale = newScale;
+    }
+
+    public double getYScale() {
+        return this.yScale;
+    }
+
     public void render(GuiGraphics guiGraphics) {
         int screenWidth = Minecraft.getInstance().getWindow().getGuiScaledWidth();
         int screenHeight = Minecraft.getInstance().getWindow().getGuiScaledHeight();
 
-        // Initial dimensions in pixels
         int initialX = (int) (this.x * screenWidth);
         int initialY = (int) (this.y * screenHeight);
         int initialWidth = (int) (this.width * screenWidth);
         int initialHeight = (int) (this.height * screenHeight);
 
         // Apply scale
-        int scaledWidth = (int) (initialWidth * scale);
-        int scaledHeight = (int) (initialHeight * scale);
+        Kariview.LOGGER.info("Received xScale of {} and yScale of {}", xScale, yScale);
+        int scaledWidth = (int) (initialWidth * xScale);
+        int scaledHeight = (int) (initialHeight * yScale);
 
         // Maintain aspect ratio
         float aspect = (float) textureWidth / (float) textureHeight;
@@ -135,5 +145,4 @@ public class GuiElement {
 
         guiGraphics.pose().popPose();
     }
-
 }
