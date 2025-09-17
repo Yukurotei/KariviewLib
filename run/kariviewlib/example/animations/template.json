@@ -59,14 +59,6 @@
           "easing_type": "easeInOutQuad"
         },
         {
-          "type": "extend_element",
-          "element_id": "animated_sprite",
-          "amount": 5,
-          "duration": 5000,
-          "direction": "RIGHT",
-          "easing_type": "linear"
-        },
-        {
           "type": "play_sound",
           "sound_id": "example.ogg",
           "volume": 0.5
@@ -128,12 +120,25 @@
       "timestamp": 11000,
       "actions": [
         {
-          "type": "hide_element",
-          "element_id": "animated_sprite"
-        },
+          "type": "extend_element",
+          "element_id": "animated_sprite",
+          "target_value": 5,
+          "duration": 10,
+          "direction": "RIGHT",
+          "easing_type": "easeInOutQuad"
+        }
+      ]
+    },
+    {
+      "timestamp": 20000,
+      "actions": [
         {
-          "type": "hide_element",
-          "element_id": "example_image"
+          "type": "extend_element",
+          "element_id": "animated_sprite",
+          "target_value": 1,
+          "duration": 5000,
+          "direction": "RIGHT",
+          "easing_type": "linear"
         }
       ]
     },
@@ -142,6 +147,14 @@
       "actions": [
         {
           "type": "stop_all_sounds"
+        },
+        {
+          "type": "hide_element",
+          "element_id": "animated_sprite"
+        },
+        {
+          "type": "hide_element",
+          "element_id": "example_image"
         }
       ]
     }

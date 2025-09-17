@@ -36,7 +36,7 @@ public class AnimationManager {
     private static final Map<String, MoveState> movingStates = new HashMap<>();
     private static final Map<String, RotateState> rotatingStates = new HashMap<>();
 
-    private record ScaleState(long startTime, double startXScale, double startYScale, double targetXScale, double targetYScale, long duration, String easingType) {}
+    private record ScaleState(long startTime, double startXScale, double startYScale, double targetXScale, double targetYScale, long duration, String direction, double startX, double startY, String easingType) {}
 
     private record FadeState(long startTime, float startOpacity, float targetOpacity, long duration, String easingType) {}
 
@@ -100,7 +100,7 @@ public class AnimationManager {
             return false;
         });
 
-        //Update scaling elements
+        //Update scaling elements AND extending elements
         scalingStates.entrySet().removeIf(entry -> {
             String elementId = entry.getKey();
             ScaleState state = entry.getValue();
@@ -113,6 +113,17 @@ public class AnimationManager {
             if (elapsedSinceStart >= state.duration()) {
                 element.setXScale(state.targetXScale());
                 element.setYScale(state.targetYScale());
+                //Set position to its final resting place
+                if (state.direction() != null) {
+                    switch (state.direction()) {
+                        case "LEFT":
+                            element.setX(state.startX() + (state.startXScale() - state.targetXScale()) * element.getWidth());
+                            break;
+                        case "UP":
+                            element.setY(state.startY() + (state.startYScale() - state.targetYScale()) * element.getHeight());
+                            break;
+                    }
+                }
                 return true;
             }
 
@@ -120,9 +131,21 @@ public class AnimationManager {
             double easedProgress = Easing.getEasedProgress(state.easingType(), progress);
             double newXScale = state.startXScale() + (state.targetXScale() - state.startXScale()) * easedProgress;
             double newYScale = state.startYScale() + (state.targetYScale() - state.startYScale()) * easedProgress;
+
             element.setXScale(newXScale);
             element.setYScale(newYScale);
 
+            //Adjust position based on direction
+            if (state.direction() != null) {
+                switch (state.direction()) {
+                    case "LEFT":
+                        element.setX(state.startX() + (state.startXScale() - newXScale) * element.getWidth());
+                        break;
+                    case "UP":
+                        element.setY(state.startY() + (state.startYScale() - newYScale) * element.getHeight());
+                        break;
+                }
+            }
             return false;
         });
 
@@ -332,11 +355,11 @@ public class AnimationManager {
             switch (action.getDirection()) {
                 case "LEFT":
                 case "RIGHT":
-                    targetX = action.getAmount();
+                    targetX = action.getTargetValue();
                     break;
                 case "UP":
                 case "DOWN":
-                    targetY = action.getAmount();
+                    targetY = action.getTargetValue();
                     break;
             }
 
@@ -347,6 +370,9 @@ public class AnimationManager {
                     targetX,
                     targetY,
                     action.getDuration(),
+                    action.getDirection(),
+                    element.getX(),
+                    element.getY(),
                     action.getEasingType()
             ));
         } else {
@@ -393,9 +419,12 @@ public class AnimationManager {
                     System.currentTimeMillis() - animationStartTime,
                     element.getXScale(),
                     element.getYScale(),
-                    action.getTargetScale(),
-                    action.getTargetScale(),
+                    element.getXScale() < action.getTargetScale() ? action.getTargetScale() / 2 : action.getTargetScale(),
+                    element.getYScale() < action.getTargetScale() ? action.getTargetScale() / 2 : action.getTargetScale(),
                     action.getDuration(),
+                    "ALL",
+                    element.getX(),
+                    element.getY(),
                     action.getEasingType()
             ));
         } else {

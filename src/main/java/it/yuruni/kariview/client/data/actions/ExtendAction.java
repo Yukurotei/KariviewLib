@@ -5,7 +5,8 @@ import com.google.gson.annotations.SerializedName;
 public class ExtendAction implements Action {
     @SerializedName("element_id")
     private String elementId;
-    private double amount;
+    @SerializedName("target_value")
+    private double targetValue;
     private long duration;
     private String direction;
     @SerializedName("easing_type")
@@ -15,8 +16,8 @@ public class ExtendAction implements Action {
         return elementId;
     }
 
-    public double getAmount() {
-        return amount;
+    public double getTargetValue() {
+        return targetValue;
     }
 
     public long getDuration() {

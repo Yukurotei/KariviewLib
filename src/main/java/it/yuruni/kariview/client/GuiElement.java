@@ -110,7 +110,6 @@ public class GuiElement {
         int initialHeight = (int) (this.height * screenHeight);
 
         // Apply scale
-        Kariview.LOGGER.info("Received xScale of {} and yScale of {}", xScale, yScale);
         int scaledWidth = (int) (initialWidth * xScale);
         int scaledHeight = (int) (initialHeight * yScale);
 
@@ -121,6 +120,9 @@ public class GuiElement {
         } else {
             scaledWidth = (int) (scaledHeight * aspect);
         }
+
+        scaledWidth = (int) (scaledWidth * xScale); //Recalculate scale
+        scaledHeight = (int) (scaledHeight * yScale);
 
         // Center the scaled element
         int drawX = initialX - (scaledWidth - initialWidth) / 2;
