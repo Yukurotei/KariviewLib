@@ -59,8 +59,15 @@
           "easing_type": "easeInOutQuad"
         },
         {
+          "type": "rotate_element",
+          "element_id": "example_image",
+          "target_angle": 7200,
+          "duration": 273000,
+          "easing_type": "linear"
+        },
+        {
           "type": "play_sound",
-          "sound_id": "example.ogg",
+          "sound_id": "example2.ogg",
           "volume": 0.5
         },
         {
@@ -156,7 +163,7 @@
       ]
     },
     {
-      "timestamp": 240000,
+      "timestamp": 273000,
       "actions": [
         {
           "type": "stop_all_sounds"
