@@ -49,7 +49,7 @@
           "target_x": 0.7,
           "target_y": 0.7,
           "duration": 5000,
-          "easing_type": "easeInOutQuad"
+          "easing_type": "easeInOutBack"
         },
         {
           "type": "rotate_element",
@@ -68,13 +68,13 @@
           "element_id": "example_image",
           "sensitivity": 1,
           "max_hertz": 120,
-          "min_hertz": 20,
-          "max_value": 1.7,
+          "min_hertz": 0,
+          "max_value": 1.5,
           "max_volume": 2,
           "effect": "scale",
           "decay_duration": 150,
           "default_value": 1,
-          "easing_type": "easeInOutQuad"
+          "easing_type": "easeInOutBack"
         }
       ]
     },
