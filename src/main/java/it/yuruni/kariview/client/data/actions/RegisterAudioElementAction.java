@@ -16,6 +16,7 @@ public class RegisterAudioElementAction implements Action {
     private float maxVolume;
     private String effect;
     private String direction;
+    @SerializedName("decay_duration")
     private float decay;
     @SerializedName("default_value")
     private float defaultValue;
