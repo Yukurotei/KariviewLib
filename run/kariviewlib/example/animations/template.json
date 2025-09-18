@@ -3,7 +3,7 @@
   "elements": [
     {
       "element_id": "example_image",
-      "texture_path": "example.png"
+      "texture_path": "teto.png"
     },
     {
       "element_id": "animated_sprite",
@@ -33,8 +33,8 @@
           "element_id": "example_image",
           "x": 0.5,
           "y": 0.5,
-          "texture_width": 2048,
-          "texture_height": 1152,
+          "texture_width": 526,
+          "texture_height": 629,
           "width": 0.3,
           "height": 0.17
         },
