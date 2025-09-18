@@ -8,15 +8,14 @@ import it.yuruni.kariview.client.data.AnimationLoader;
 import it.yuruni.kariview.client.data.Keyframe;
 import it.yuruni.kariview.client.data.actions.*;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
+import it.yuruni.kariview.client.sound.BeatDetector;
 import it.yuruni.kariview.client.sound.RawAudio;
+import it.yuruni.kariview.client.sound.state.PulseState;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
 import java.io.File;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Optional;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
@@ -35,6 +34,7 @@ public class AnimationManager {
     private static final Map<String, FadeState> fadingStates = new HashMap<>();
     private static final Map<String, MoveState> movingStates = new HashMap<>();
     private static final Map<String, RotateState> rotatingStates = new HashMap<>();
+    private static final ConcurrentMap<String, PulseState> pulseStates = new ConcurrentHashMap<>();
 
     private record ScaleState(long startTime, double startXScale, double startYScale, double targetXScale, double targetYScale, long duration, String direction, double startX, double startY, String easingType) {}
 
@@ -53,6 +53,8 @@ public class AnimationManager {
         spriteStates.clear();
         spriteUpdateIntervals.clear();
         rotatingStates.clear();
+        pulseStates.clear();
+        BeatDetector.registeredAudioElements.clear();
     }
 
     public static void playAnimation(String namespace, String animationId) {
@@ -99,6 +101,37 @@ public class AnimationManager {
 
             return false;
         });
+
+        //Update audio driven pulse states
+        for (Map.Entry<String, PulseState> entry : pulseStates.entrySet()) {
+            String elementId = entry.getKey();
+            PulseState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element != null) {
+                long pulseDuration = System.currentTimeMillis() - state.lastPulseTime;
+
+                if (state.isPulsing) {
+                    // Pulse Up: animate from the start scale to the new target
+                    double progress = Math.min(1.0, (double) pulseDuration / 50.0); // 50ms pulse up
+                    double easedProgress = Easing.getEasedProgress(state.easingType, progress);
+                    double newScale = state.startScale + (state.targetScale - state.startScale) * easedProgress;
+                    element.setXScale(newScale);
+                    element.setYScale(newScale);
+                    if (progress >= 1.0) {
+                        state.isPulsing = false;
+                        state.startScale = element.getXScale(); // Set the start scale for decay
+                        state.lastPulseTime = System.currentTimeMillis();
+                    }
+                } else {
+                    // Decay: animate from the current scale back down to default
+                    double progress = Math.min(1.0, (double) pulseDuration / state.decay);
+                    double easedProgress = Easing.getEasedProgress(state.easingType, progress);
+                    double newScale = state.startScale - (state.startScale - state.defaultValue) * easedProgress;
+                    element.setXScale(newScale);
+                    element.setYScale(newScale);
+                }
+            }
+        }
 
         //Update scaling elements AND extending elements
         scalingStates.entrySet().removeIf(entry -> {
@@ -306,6 +339,21 @@ public class AnimationManager {
         AnimationLoader.loadAllAnimations();
     }
 
+    public static void triggerPulse(String elementId, double targetScale, double decay, double defaultValue, String easingType) {
+        if (activeElements.containsKey(elementId)) {
+            PulseState state = pulseStates.get(elementId);
+            if (state == null) {
+                state = new PulseState(targetScale, decay, defaultValue, easingType);
+                pulseStates.put(elementId, state);
+            }
+            state.lastPulseTime = System.currentTimeMillis();
+            state.startScale = activeElements.get(elementId).getXScale();
+            // Corrected line: Set the target scale to the maximum of the *current* element scale and the new target.
+            state.targetScale = Math.max(state.startScale, targetScale);
+            state.isPulsing = true;
+        }
+    }
+
     private static void executeKeyframeActions(List<Action> actions) {
         if (actions == null) {
             return;
@@ -342,9 +390,26 @@ public class AnimationManager {
                 handleRotateAction((RotateAction) action);
             } else if (action instanceof ExtendAction) {
                 handleExtendAction((ExtendAction) action);
+            } else if (action instanceof RegisterAudioElementAction) {
+                handleRegisterAudioElementAction((RegisterAudioElementAction) action);
+            } else if (action instanceof UnregisterAudioElementAction) {
+                handleUnregisterAudioElementAction((UnregisterAudioElementAction) action);
             }
         }
     }
+
+    private static void handleRegisterAudioElementAction(RegisterAudioElementAction action) {
+        if (activeElements.containsKey(action.getElementId())) {
+            BeatDetector.registeredAudioElements.put(action.getElementId(), action);
+        } else {
+            LOGGER.error("Cannot register audio element. Element not found: {}", action.getElementId());
+        }
+    }
+
+    private static void handleUnregisterAudioElementAction(UnregisterAudioElementAction action) {
+        BeatDetector.registeredAudioElements.remove(action.getElementId());
+    }
+
 
     private static void handleExtendAction(ExtendAction action) {
         GuiElement element = activeElements.get(action.getElementId());

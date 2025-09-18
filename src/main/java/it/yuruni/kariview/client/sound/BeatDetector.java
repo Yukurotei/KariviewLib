@@ -1,17 +1,16 @@
 package it.yuruni.kariview.client.sound;
 
+import it.yuruni.kariview.client.animation.AnimationManager;
 import it.yuruni.kariview.client.data.AudioData;
-import net.minecraft.client.Minecraft;
-import net.minecraft.network.chat.Component;
+import it.yuruni.kariview.client.data.actions.RegisterAudioElementAction;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
 
 import java.nio.ShortBuffer;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 
 @Mod.EventBusSubscriber
@@ -19,22 +18,20 @@ public class BeatDetector {
     private static final int BUFFER_SIZE = 1024;
     private static final int HISTORY_SIZE = 60;
     private final FFT fft;
-    private final List<AudioElement> audioElements;
-    private final Map<String, float[]> energyHistoryMap = new HashMap<>();
-    private final Map<String, Integer> historyIndexMap = new HashMap<>();
+
+    private static final ConcurrentMap<String, float[]> energyHistoryMap = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Integer> historyIndexMap = new ConcurrentHashMap<>();
+
+    public static final ConcurrentMap<String, RegisterAudioElementAction> registeredAudioElements = new ConcurrentHashMap<>();
 
     public BeatDetector() {
         this.fft = new FFT(BUFFER_SIZE);
-        this.audioElements = new ArrayList<>();
-        //Dummy
-        this.audioElements.add(new AudioElement("example_image", "example.png", 1.25f, 120, 60, 2.0f, 2, "pulse", 1, 0.5f, 1.0f));
     }
 
     @SubscribeEvent
     public void onClientTick(TickEvent.ClientTickEvent event) {
         if (event.phase == TickEvent.Phase.START) {
             update();
-            AudioStateManager.update();
         }
     }
 
@@ -53,17 +50,16 @@ public class BeatDetector {
 
             float[] audioChunk = extractAudioChunk(data, playbackOffset);
 
-            for (AudioElement element : audioElements) {
-                //NOTE: Initialize history for element if it doesn't exist
-                if (!energyHistoryMap.containsKey(element.elementId)) {
-                    energyHistoryMap.put(element.elementId, new float[HISTORY_SIZE]);
-                    historyIndexMap.put(element.elementId, 0);
+            for (Map.Entry<String, RegisterAudioElementAction> entry : registeredAudioElements.entrySet()) {
+                String elementId = entry.getKey();
+                RegisterAudioElementAction elementConfig = entry.getValue();
+
+                if (!energyHistoryMap.containsKey(elementId)) {
+                    energyHistoryMap.put(elementId, new float[HISTORY_SIZE]);
+                    historyIndexMap.put(elementId, 0);
                 }
 
-                boolean beatDetected = analyzeForElement(audioChunk, element);
-                if (beatDetected) {
-                    //Minecraft.getInstance().player.sendSystemMessage(Component.literal("Beat detected for element: " + element.elementId + " at " + System.currentTimeMillis()));
-                }
+                analyzeAndDispatch(audioChunk, elementConfig, elementId);
             }
         }
     }
@@ -104,7 +100,7 @@ public class BeatDetector {
         return audioChunk;
     }
 
-    private boolean analyzeForElement(float[] data, AudioElement element) {
+    private void analyzeAndDispatch(float[] data, RegisterAudioElementAction elementConfig, String elementId) {
         float[] fftData = new float[BUFFER_SIZE * 2];
         for (int i = 0; i < BUFFER_SIZE; i++) {
             fftData[i * 2] = data[i];
@@ -117,15 +113,15 @@ public class BeatDetector {
         float bandEnergy = 0;
         for (int i = 0; i < BUFFER_SIZE / 2; i++) {
             float frequency = (float) i * sampleRate / BUFFER_SIZE;
-            if (frequency >= element.minHertz && frequency <= element.maxHertz) {
+            if (frequency >= elementConfig.getMinHertz() && frequency <= elementConfig.getMaxHertz()) {
                 float real = fftData[i * 2];
                 float imag = fftData[i * 2 + 1];
                 bandEnergy += real * real + imag * imag;
             }
         }
 
-        float[] energyHistory = energyHistoryMap.get(element.elementId);
-        int historyIndex = historyIndexMap.get(element.elementId);
+        float[] energyHistory = energyHistoryMap.get(elementId);
+        int historyIndex = historyIndexMap.get(elementId);
 
         float averageEnergy = 0;
         for (float energy : energyHistory) {
@@ -133,25 +129,29 @@ public class BeatDetector {
         }
         averageEnergy /= HISTORY_SIZE;
 
-        boolean beat = bandEnergy > averageEnergy * element.sensitivity;
+        boolean beat = bandEnergy > averageEnergy * elementConfig.getSensitivity();
 
         if (beat) {
             float currentVolume = (float) Math.sqrt(bandEnergy);
-            float volumeRatio = currentVolume / element.maxVolume;
-            float newValue = element.defaultValue + (element.maxValue - element.defaultValue) * volumeRatio;
-
-            if (newValue > element.maxValue) {
-                newValue = element.maxValue;
+            float volumeRatio = currentVolume / elementConfig.getMaxVolume();
+            float pulseValue = elementConfig.getDefaultValue() + (elementConfig.getMaxValue() - elementConfig.getDefaultValue()) * volumeRatio;
+            if (pulseValue > elementConfig.getMaxValue()) {
+                pulseValue = elementConfig.getMaxValue();
             }
 
-            AudioStateManager.setElementValue(element.elementId, newValue);
+            AnimationManager.triggerPulse(
+                    elementId,
+                    pulseValue,
+                    elementConfig.getDecay(),
+                    elementConfig.getDefaultValue(),
+                    elementConfig.getEasingType()
+            );
         }
 
         energyHistory[historyIndex] = bandEnergy;
-        historyIndexMap.put(element.elementId, (historyIndex + 1) % HISTORY_SIZE);
-
-        return beat;
+        historyIndexMap.put(elementId, (historyIndex + 1) % HISTORY_SIZE);
     }
+}
 
     /*
     private boolean analyzeForBeats(float[] data) {
@@ -191,4 +191,3 @@ public class BeatDetector {
         return beat;
     }
      */
-}

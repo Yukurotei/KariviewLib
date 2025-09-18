@@ -62,6 +62,19 @@
           "type": "play_sound",
           "sound_id": "example.ogg",
           "volume": 0.5
+        },
+        {
+          "type": "register_audio_element",
+          "element_id": "example_image",
+          "sensitivity": 0.8,
+          "max_hertz": 120,
+          "min_hertz": 20,
+          "max_value": 1.2,
+          "max_volume": 4,
+          "effect": "scale",
+          "decay": 300,
+          "default_value": 1,
+          "easing_type": "easeInOutQuad"
         }
       ]
     },

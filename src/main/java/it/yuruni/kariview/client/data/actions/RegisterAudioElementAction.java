@@ -19,6 +19,8 @@ public class RegisterAudioElementAction implements Action {
     private float decay;
     @SerializedName("default_value")
     private float defaultValue;
+    @SerializedName("easing_type")
+    private String easingType;
 
     public String getElementId() {
         return elementId;
@@ -58,5 +60,9 @@ public class RegisterAudioElementAction implements Action {
 
     public float getDefaultValue() {
         return defaultValue;
+    }
+
+    public String getEasingType() {
+        return easingType;
     }
 }

@@ -39,7 +39,9 @@ public class AnimationLoader {
                 .registerSubtype(ScaleAction.class, "scale_element")
                 .registerSubtype(MoveAction.class, "move_element")
                 .registerSubtype(RotateAction.class, "rotate_element")
-                .registerSubtype(ExtendAction.class, "extend_element");
+                .registerSubtype(ExtendAction.class, "extend_element")
+                .registerSubtype(RegisterAudioElementAction.class, "register_audio_element")
+                .registerSubtype(UnregisterAudioElementAction.class, "unregister_audio_element");
 
         GSON = new GsonBuilder()
                 .registerTypeAdapterFactory(actionAdapter)
