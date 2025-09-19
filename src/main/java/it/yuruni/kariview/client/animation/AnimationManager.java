@@ -10,7 +10,7 @@ import it.yuruni.kariview.client.data.actions.*;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
 import it.yuruni.kariview.client.sound.BeatDetector;
 import it.yuruni.kariview.client.sound.RawAudio;
-import it.yuruni.kariview.client.sound.state.PulseState;
+import it.yuruni.kariview.client.states.PulseState;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -27,7 +27,7 @@ public class AnimationManager {
     private static final ConcurrentMap<String, GuiElement> activeElements = new ConcurrentHashMap<>();
     private static int lastKeyframeIndex = -1;
 
-    private static final Map<String, SpriteState> spriteStates = new HashMap<>();
+    public static final Map<String, SpriteState> spriteStates = new HashMap<>();
     private static final Map<String, Long> spriteUpdateIntervals = new HashMap<>();
     private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
     private static final Map<String, ScaleState> scalingStates = new HashMap<>();
@@ -273,7 +273,6 @@ public class AnimationManager {
                 spriteState.setCurrentIndex(nextIndex);
                 spriteState.setLastUpdateTime(elapsed);
 
-                // Update the texture of the active element directly
                 activeElement.setTexture(spriteState.getCurrentSprite());
             }
         }
@@ -348,9 +347,36 @@ public class AnimationManager {
             }
             state.lastPulseTime = System.currentTimeMillis();
             state.startScale = activeElements.get(elementId).getXScale();
-            // Corrected line: Set the target scale to the maximum of the *current* element scale and the new target.
             state.targetScale = Math.max(state.startScale, targetScale);
             state.isPulsing = true;
+        }
+    }
+
+    public static void triggerSpriteChange(String elementId, int steps, int duration, boolean shouldLoop) {
+        if (activeElements.containsKey(elementId)) {
+            SpriteState spriteState = spriteStates.get(elementId);
+            GuiElement activeElement = activeElements.get(elementId);
+            if (spriteState != null && activeElement != null) {
+                int currentSpriteIndex = spriteState.getCurrentIndex();
+                int targetIndex = currentSpriteIndex + steps;
+
+                if (!shouldLoop && (targetIndex < 0 || targetIndex >= spriteState.getSprites().size())) {
+                    LOGGER.warn("StepChange (audio element): Stepping out of bounds for non-looping sprite.");
+                    return;
+                }
+
+                animatedStepStates.put(elementId, new AnimatedStepState(
+                        System.currentTimeMillis() - animationStartTime,
+                        currentSpriteIndex,
+                        targetIndex,
+                        duration,
+                        shouldLoop,
+                        spriteState.getSprites().size(),
+                        steps
+                ));
+            } else {
+                LOGGER.error("StepChange (audio element): No sprite animation state or active element found for: {}", elementId);
+            }
         }
     }
 

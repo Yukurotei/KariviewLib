@@ -22,6 +22,10 @@ public class RegisterAudioElementAction implements Action {
     private float defaultValue;
     @SerializedName("easing_type")
     private String easingType;
+    @SerializedName("sprite_step")
+    private int spriteStep;
+    @SerializedName("loop_sprite")
+    private boolean loopSprite;
 
     public String getElementId() {
         return elementId;
@@ -48,11 +52,11 @@ public class RegisterAudioElementAction implements Action {
     }
 
     public String getEffect() {
-        return effect;
+        return effect.toUpperCase();
     }
 
     public String getDirection() {
-        return direction;
+        return direction.toUpperCase();
     }
 
     public float getDecay() {
@@ -65,5 +69,13 @@ public class RegisterAudioElementAction implements Action {
 
     public String getEasingType() {
         return easingType;
+    }
+
+    public int getSpriteStep() {
+        return spriteStep;
+    }
+
+    public boolean isLoopSprite() {
+        return loopSprite;
     }
 }

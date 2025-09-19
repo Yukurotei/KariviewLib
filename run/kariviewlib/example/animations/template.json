@@ -3,11 +3,15 @@
   "elements": [
     {
       "element_id": "example_image",
-      "texture_path": "teto.png"
+      "texture_path": "example.png"
     },
     {
       "element_id": "animated_sprite",
       "texture_path_pattern": "megaknight*.png"
+    },
+    {
+      "element_id": "teto",
+      "texture_path_pattern": "teto*.png"
     }
   ],
   "keyframes": [
@@ -33,10 +37,20 @@
           "element_id": "example_image",
           "x": 0.5,
           "y": 0.5,
-          "texture_width": 526,
-          "texture_height": 629,
+          "texture_width": 2048,
+          "texture_height": 1152,
           "width": 0.3,
           "height": 0.17
+        },
+        {
+          "type": "show_element",
+          "element_id": "teto",
+          "x": 0.1,
+          "y": 0.3,
+          "texture_width": 526,
+          "texture_height": 629,
+          "width": 0.4,
+          "height": 0.24
         },
         {
           "type": "update_sprite",
@@ -72,16 +86,18 @@
         },
         {
           "type": "register_audio_element",
-          "element_id": "example_image",
+          "element_id": "teto",
           "sensitivity": 1,
           "max_hertz": 120,
           "min_hertz": 0,
           "max_value": 1.5,
           "max_volume": 2,
-          "effect": "scale",
+          "effect": "STEP_SPRITE",
           "decay_duration": 150,
           "default_value": 1,
-          "easing_type": "easeInOutBack"
+          "easing_type": "easeInOutBack",
+          "sprite_step": 1,
+          "loop_sprite": true
         }
       ]
     },

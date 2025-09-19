@@ -1,4 +1,4 @@
-package it.yuruni.kariview.client.sound.state;
+package it.yuruni.kariview.client.states;
 
 public class PulseState {
     public double targetScale;

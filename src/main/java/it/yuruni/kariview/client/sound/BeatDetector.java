@@ -132,20 +132,27 @@ public class BeatDetector {
         boolean beat = bandEnergy > averageEnergy * elementConfig.getSensitivity();
 
         if (beat) {
-            float currentVolume = (float) Math.sqrt(bandEnergy);
-            float volumeRatio = currentVolume / elementConfig.getMaxVolume();
-            float pulseValue = elementConfig.getDefaultValue() + (elementConfig.getMaxValue() - elementConfig.getDefaultValue()) * volumeRatio;
-            if (pulseValue > elementConfig.getMaxValue()) {
-                pulseValue = elementConfig.getMaxValue();
-            }
+            if (elementConfig.getEffect().equals("PULSE")) {
+                float currentVolume = (float) Math.sqrt(bandEnergy);
+                float volumeRatio = currentVolume / elementConfig.getMaxVolume();
+                float pulseValue = elementConfig.getDefaultValue() + (elementConfig.getMaxValue() - elementConfig.getDefaultValue()) * volumeRatio;
+                if (pulseValue > elementConfig.getMaxValue()) {
+                    pulseValue = elementConfig.getMaxValue();
+                }
 
-            AnimationManager.triggerPulse(
-                    elementId,
-                    pulseValue,
-                    elementConfig.getDecay(),
-                    elementConfig.getDefaultValue(),
-                    elementConfig.getEasingType()
-            );
+                AnimationManager.triggerPulse(
+                        elementId,
+                        pulseValue,
+                        elementConfig.getDecay(),
+                        elementConfig.getDefaultValue(),
+                        elementConfig.getEasingType()
+                );
+            } else if (elementConfig.getEffect().equals("STEP_SPRITE")) {
+                //Check if element is sprite
+                if (AnimationManager.spriteStates.containsKey(elementId)) {
+                    AnimationManager.triggerSpriteChange(elementId, elementConfig.getSpriteStep(), (int)elementConfig.getDecay(), elementConfig.isLoopSprite());
+                }
+            }
         }
 
         energyHistory[historyIndex] = bandEnergy;
