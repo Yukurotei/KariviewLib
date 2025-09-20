@@ -7,8 +7,7 @@ public class ShowElementAction implements Action {
     private String elementId;
     private double x;
     private double y;
-    private double width;
-    private double height;
+    private double scale;
     @SerializedName("texture_width")
     private int textureWidth;
     @SerializedName("texture_height")
@@ -35,11 +34,11 @@ public class ShowElementAction implements Action {
     }
 
     public double getWidth() {
-        return width;
+        return scale;
     }
 
     public double getHeight() {
-        return height;
+        return scale;
     }
 
     public int getTextureWidth() {

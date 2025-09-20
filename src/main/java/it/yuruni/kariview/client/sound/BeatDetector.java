@@ -3,6 +3,9 @@ package it.yuruni.kariview.client.sound;
 import it.yuruni.kariview.client.animation.AnimationManager;
 import it.yuruni.kariview.client.data.AudioData;
 import it.yuruni.kariview.client.data.actions.RegisterAudioElementAction;
+import it.yuruni.kariview.client.effects.AudioEffect;
+import it.yuruni.kariview.client.effects.PulseEffect;
+import it.yuruni.kariview.client.effects.StepSpriteEffect;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -132,25 +135,30 @@ public class BeatDetector {
         boolean beat = bandEnergy > averageEnergy * elementConfig.getSensitivity();
 
         if (beat) {
-            if (elementConfig.getEffect().equals("PULSE")) {
-                float currentVolume = (float) Math.sqrt(bandEnergy);
-                float volumeRatio = currentVolume / elementConfig.getMaxVolume();
-                float pulseValue = elementConfig.getDefaultValue() + (elementConfig.getMaxValue() - elementConfig.getDefaultValue()) * volumeRatio;
-                if (pulseValue > elementConfig.getMaxValue()) {
-                    pulseValue = elementConfig.getMaxValue();
-                }
+            for (AudioEffect effect : elementConfig.getEffects()) {
+                if (effect.getType().equals("PULSE")) {
+                    PulseEffect pulseEffect = (PulseEffect) effect;
 
-                AnimationManager.triggerPulse(
-                        elementId,
-                        pulseValue,
-                        elementConfig.getDecay(),
-                        elementConfig.getDefaultValue(),
-                        elementConfig.getEasingType()
-                );
-            } else if (elementConfig.getEffect().equals("STEP_SPRITE")) {
-                //Check if element is sprite
-                if (AnimationManager.spriteStates.containsKey(elementId)) {
-                    AnimationManager.triggerSpriteChange(elementId, elementConfig.getSpriteStep(), (int)elementConfig.getDecay(), elementConfig.isLoopSprite());
+                    float currentVolume = (float) Math.sqrt(bandEnergy);
+                    float volumeRatio = currentVolume / elementConfig.getMaxVolume();
+                    float pulseValue = pulseEffect.getDefaultValue() + (pulseEffect.getMaxValue() - pulseEffect.getDefaultValue()) * volumeRatio;
+                    if (pulseValue > pulseEffect.getMaxValue()) {
+                        pulseValue = pulseEffect.getMaxValue();
+                    }
+
+                    AnimationManager.triggerPulse(
+                            elementId,
+                            pulseValue,
+                            pulseEffect.getDecay(),
+                            pulseEffect.getDefaultValue(),
+                            elementConfig.getEasingType()
+                    );
+                } else if (effect.getType().equals("STEP_SPRITE")) {
+                    //Check if element is sprite
+                    if (AnimationManager.spriteStates.containsKey(elementId)) {
+                        StepSpriteEffect stepEffect = (StepSpriteEffect) effect;
+                        AnimationManager.triggerSpriteChange(elementId, stepEffect.getSpriteStep(), stepEffect.getDelay(), stepEffect.isLoopSprite());
+                    }
                 }
             }
         }
