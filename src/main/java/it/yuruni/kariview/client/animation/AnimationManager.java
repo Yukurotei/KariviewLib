@@ -12,6 +12,7 @@ import it.yuruni.kariview.client.sound.BeatDetector;
 import it.yuruni.kariview.client.sound.RawAudio;
 import it.yuruni.kariview.client.states.ExtendState;
 import it.yuruni.kariview.client.states.PulseState;
+import net.minecraft.client.renderer.texture.TextureManager;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
 
@@ -38,6 +39,8 @@ public class AnimationManager {
     private static final ConcurrentMap<String, PulseState> pulseStates = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, ExtendState> extendStates = new ConcurrentHashMap<>();
 
+    private static final ConcurrentMap<String, GuiElement> temporaryElements = new ConcurrentHashMap<>();
+
     private record AnimatedStepState(long startTime, int startSpriteIndex, int targetSpriteIndex, long duration,
                                      boolean loop, int totalSprites, int totalSteps) {
         public boolean shouldLoop() {
@@ -52,6 +55,18 @@ public class AnimationManager {
     private record MoveState(long startTime, double startX, double startY, double targetX, double targetY, long duration, String easingType) {}
 
     private record RotateState(long startTime, double startAngle, double targetAngle, long duration, String easingType) {}
+
+    public static void displayTemporaryElement(String elementId, String namespace, String texturePath, double x, double y, double scale, int textureWidth, int textureHeight) {
+        ResourceLocation textureResource = AssetManager.loadTexture(namespace, texturePath);
+        if (textureResource != null) {
+            GuiElement newElement = new GuiElement(textureResource, x, y, scale, scale, textureWidth, textureHeight);
+            temporaryElements.put(elementId, newElement);
+        }
+    }
+
+    public static void hideAllTemporaryElements() {
+        temporaryElements.clear();
+    }
 
     public static void startAnimation(AnimationData animationData) {
         currentAnimation = animationData;
@@ -747,7 +762,10 @@ public class AnimationManager {
         }
     }
 
-    public static ConcurrentMap<String, GuiElement> getActiveElements() {
-        return activeElements;
+    public static Map<String, GuiElement> getActiveElements() {
+        Map<String, GuiElement> allElements = new HashMap<>();
+        allElements.putAll(activeElements);
+        allElements.putAll(temporaryElements);
+        return allElements;
     }
 }
