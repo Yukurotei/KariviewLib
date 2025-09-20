@@ -6,6 +6,7 @@ import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.client.animation.AssetManager;
 import it.yuruni.kariview.client.data.actions.*;
 import it.yuruni.kariview.client.effects.AudioEffect;
+import it.yuruni.kariview.client.effects.ExtendEffect;
 import it.yuruni.kariview.client.effects.PulseEffect;
 import it.yuruni.kariview.client.effects.StepSpriteEffect;
 import net.minecraftforge.fml.loading.FMLPaths;
@@ -48,7 +49,8 @@ public class AnimationLoader {
 
         RuntimeTypeAdapterFactory<AudioEffect> audioEffectAdapter = RuntimeTypeAdapterFactory.of(AudioEffect.class, "type")
                 .registerSubtype(StepSpriteEffect.class, "STEP_SPRITE")
-                .registerSubtype(PulseEffect.class, "PULSE");
+                .registerSubtype(PulseEffect.class, "PULSE")
+                .registerSubtype(ExtendEffect.class, "EXTEND");
 
         GSON = new GsonBuilder()
                 .registerTypeAdapterFactory(actionAdapter)

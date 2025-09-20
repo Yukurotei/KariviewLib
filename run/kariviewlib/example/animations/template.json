@@ -96,10 +96,12 @@
               "delay": 150
             },
             {
-              "type": "PULSE",
-              "decay_duration": 150,
-              "default_scale": 1,
-              "max_scale": 1.5
+              "type": "EXTEND",
+              "target_value": 2,
+              "direction": "LEFT",
+              "default_value": 1,
+              "decay": 150,
+              "extend_duration": 100
             }
           ],
           "easing_type": "easeInOutBack"

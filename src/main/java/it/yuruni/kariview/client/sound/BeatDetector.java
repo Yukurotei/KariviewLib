@@ -4,8 +4,10 @@ import it.yuruni.kariview.client.animation.AnimationManager;
 import it.yuruni.kariview.client.data.AudioData;
 import it.yuruni.kariview.client.data.actions.RegisterAudioElementAction;
 import it.yuruni.kariview.client.effects.AudioEffect;
+import it.yuruni.kariview.client.effects.ExtendEffect;
 import it.yuruni.kariview.client.effects.PulseEffect;
 import it.yuruni.kariview.client.effects.StepSpriteEffect;
+import net.minecraftforge.client.event.RenderGuiOverlayEvent;
 import net.minecraftforge.event.TickEvent;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.common.Mod;
@@ -136,7 +138,7 @@ public class BeatDetector {
 
         if (beat) {
             for (AudioEffect effect : elementConfig.getEffects()) {
-                if (effect.getType().equals("PULSE")) {
+                if (effect.getType().equalsIgnoreCase("PULSE")) {
                     PulseEffect pulseEffect = (PulseEffect) effect;
 
                     float currentVolume = (float) Math.sqrt(bandEnergy);
@@ -153,12 +155,32 @@ public class BeatDetector {
                             pulseEffect.getDefaultValue(),
                             elementConfig.getEasingType()
                     );
-                } else if (effect.getType().equals("STEP_SPRITE")) {
+                } else if (effect.getType().equalsIgnoreCase("STEP_SPRITE")) {
                     //Check if element is sprite
                     if (AnimationManager.spriteStates.containsKey(elementId)) {
                         StepSpriteEffect stepEffect = (StepSpriteEffect) effect;
                         AnimationManager.triggerSpriteChange(elementId, stepEffect.getSpriteStep(), stepEffect.getDelay(), stepEffect.isLoopSprite());
                     }
+                } else if (effect.getType().equalsIgnoreCase("EXTEND")) {
+                    ExtendEffect extendEffect = (ExtendEffect) effect;
+
+                    float currentVolume = (float) Math.sqrt(bandEnergy);
+                    float volumeRatio = currentVolume / elementConfig.getMaxVolume();
+                    double extendValue = extendEffect.getDefaultValue() + (extendEffect.getTargetValue() - extendEffect.getDefaultValue()) * volumeRatio;
+                    if (extendValue > extendEffect.getTargetValue()) {
+                        extendValue = extendEffect.getTargetValue();
+                    }
+
+                    AnimationManager.triggerExtend(
+                            elementId,
+                            extendEffect.getDirection(),
+                            extendValue,
+                            extendEffect.getDuration(),
+                            extendEffect.getDecay(),
+                            extendEffect.getDefaultValue(),
+                            extendEffect.getExtendTime(),
+                            elementConfig.getEasingType()
+                    );
                 }
             }
         }

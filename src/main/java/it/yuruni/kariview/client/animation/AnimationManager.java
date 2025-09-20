@@ -10,6 +10,7 @@ import it.yuruni.kariview.client.data.actions.*;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
 import it.yuruni.kariview.client.sound.BeatDetector;
 import it.yuruni.kariview.client.sound.RawAudio;
+import it.yuruni.kariview.client.states.ExtendState;
 import it.yuruni.kariview.client.states.PulseState;
 import net.minecraft.resources.ResourceLocation;
 import org.slf4j.Logger;
@@ -35,6 +36,14 @@ public class AnimationManager {
     private static final Map<String, MoveState> movingStates = new HashMap<>();
     private static final Map<String, RotateState> rotatingStates = new HashMap<>();
     private static final ConcurrentMap<String, PulseState> pulseStates = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, ExtendState> extendStates = new ConcurrentHashMap<>();
+
+    private record AnimatedStepState(long startTime, int startSpriteIndex, int targetSpriteIndex, long duration,
+                                     boolean loop, int totalSprites, int totalSteps) {
+        public boolean shouldLoop() {
+            return loop;
+        }
+    }
 
     private record ScaleState(long startTime, double startXScale, double startYScale, double targetXScale, double targetYScale, long duration, String direction, double startX, double startY, String easingType) {}
 
@@ -129,6 +138,54 @@ public class AnimationManager {
                     double newScale = state.startScale - (state.startScale - state.defaultValue) * easedProgress;
                     element.setXScale(newScale);
                     element.setYScale(newScale);
+                }
+            }
+        }
+
+        //Update audio driven extend states
+        for (Map.Entry<String, ExtendState> entry : extendStates.entrySet()) {
+            String elementId = entry.getKey();
+            ExtendState state = entry.getValue();
+            GuiElement element = activeElements.get(elementId);
+            if (element == null) continue;
+
+            long elapsedSinceBeat = System.currentTimeMillis() - state.lastBeatTime;
+
+            if (state.isExtending) {
+                // Extension phase
+                double progress = Math.min(1.0, (double) elapsedSinceBeat / state.extendTime);
+                double easedProgress = Easing.getEasedProgress(state.easing, progress);
+                double currentValue;
+
+                if (state.direction.equalsIgnoreCase("left") || state.direction.equalsIgnoreCase("right")) {
+                    currentValue = state.startValue + (state.targetValue - state.startValue) * easedProgress;
+                    element.setXScale(currentValue);
+                } else {
+                    currentValue = state.startValue + (state.targetValue - state.startValue) * easedProgress;
+                    element.setYScale(currentValue);
+                }
+
+                if (progress >= 1.0) {
+                    state.isExtending = false;
+                    state.startValue = currentValue; // Set the start value for the decay
+                    state.lastBeatTime = System.currentTimeMillis();
+                }
+            } else {
+                // Decay phase
+                double progress = Math.min(1.0, (double) elapsedSinceBeat / state.decay);
+                double easedProgress = Easing.getEasedProgress(state.easing, progress);
+                double currentValue;
+
+                if (state.direction.equalsIgnoreCase("left") || state.direction.equalsIgnoreCase("right")) {
+                    currentValue = state.startValue - (state.startValue - state.defaultValue) * easedProgress;
+                    element.setXScale(currentValue);
+                } else {
+                    currentValue = state.startValue - (state.startValue - state.defaultValue) * easedProgress;
+                    element.setYScale(currentValue);
+                }
+
+                if (progress >= 1.0) {
+                    extendStates.remove(elementId); // Remove state when decay is complete
                 }
             }
         }
@@ -380,6 +437,21 @@ public class AnimationManager {
         }
     }
 
+    public static void triggerExtend(String elementId, String direction, double targetValue, double duration, double decay, double defaultValue, double extendTime, String easing) {
+        if (activeElements.containsKey(elementId)) {
+            GuiElement element = activeElements.get(elementId);
+            ExtendState state = extendStates.get(elementId);
+            if (state == null) {
+                state = new ExtendState(direction, targetValue, duration, decay, defaultValue, extendTime, easing);
+                extendStates.put(elementId, state);
+            }
+            state.lastBeatTime = System.currentTimeMillis();
+            state.targetValue = targetValue;
+            state.startValue = direction.equalsIgnoreCase("left") || direction.equalsIgnoreCase("right") ? element.getXScale() : element.getYScale();
+            state.isExtending = true;
+        }
+    }
+
     private static void executeKeyframeActions(List<Action> actions) {
         if (actions == null) {
             return;
@@ -581,13 +653,6 @@ public class AnimationManager {
         }
     }
 
-    private record AnimatedStepState(long startTime, int startSpriteIndex, int targetSpriteIndex, long duration,
-                                     boolean loop, int totalSprites, int totalSteps) {
-        public boolean shouldLoop() {
-            return loop;
-        }
-        }
-
 
     private static void handleStopSpriteAnimation(StopSpriteAnimationAction action) {
         spriteUpdateIntervals.remove(action.getElementId());
@@ -622,7 +687,6 @@ public class AnimationManager {
             if (elementData.getTexture() != null) {
                 textureResource = AssetManager.loadTexture(currentAnimation.getNamespace(), elementData.getTexture());
             } else if (elementData.getTexturePathPattern() != null) {
-                // If a texture pattern exists, load the sprites and set the initial texture.
                 List<ResourceLocation> sprites = SpriteManager.loadSprites(currentAnimation.getNamespace(), elementData.getTexturePathPattern());
                 if (!sprites.isEmpty()) {
                     spriteStates.put(elementData.getId(), new SpriteState(sprites));
