@@ -163,21 +163,33 @@ public class AnimationLoader {
 
         try {
             File animationFile = getAnimationFile(namespace, animationId);
-            if (!animationFile.exists()) {
-                LOGGER.error("Animation file not found: " + animationFile.getAbsolutePath());
+            if (animationFile == null || !animationFile.exists()) {
+                LOGGER.error("Animation file not found: " + (animationFile != null ? animationFile.getAbsolutePath() : cacheKey));
                 return null;
             }
+            String content = Files.readString(animationFile.toPath());
 
-            try (FileReader reader = new FileReader(animationFile)) {
-                AnimationData data = GSON.fromJson(reader, AnimationData.class);
-                data.namespace = namespace;
-                ANIMATION_CACHE.put(cacheKey, data);
-                return data;
+            //Strip comments and commas if json5
+            if (animationFile.getName().endsWith(".json5")) {
+                content = stripCommentsAndTrailingCommas(content);
             }
+
+            AnimationData data = GSON.fromJson(content, AnimationData.class);
+            data.namespace = namespace;
+            ANIMATION_CACHE.put(cacheKey, data);
+            return data;
+
         } catch (IOException e) {
             LOGGER.error("Failed to load animation: " + cacheKey, e);
             return null;
         }
+    }
+
+    private static String stripCommentsAndTrailingCommas(String input) {
+        input = input.replaceAll("(?s)/\\*.*?\\*/", "");
+        input = input.replaceAll("(?m)//.*$", "");
+        input = input.replaceAll(",\\s*([}\\]])", "$1");
+        return input;
     }
 
     private static File getAnimationFile(String namespace, String animationId) {
@@ -185,7 +197,15 @@ public class AnimationLoader {
         File dataPackDir = new File(gameDir, DATA_PACK_FOLDER);
         File namespaceDir = new File(dataPackDir, namespace);
         File animationsDir = new File(namespaceDir, "animations");
-        return new File(animationsDir, animationId + ".json");
+
+        String[] extensions = {".json", ".json5"};
+        for (String ext : extensions) {
+            File f = new File(animationsDir, animationId + ext);
+            if (f.exists()) {
+                return f;
+            }
+        }
+        return null;
     }
 
     public static File getAssetFile(String namespace, String assetPath) {

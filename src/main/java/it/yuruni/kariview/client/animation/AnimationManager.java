@@ -452,12 +452,12 @@ public class AnimationManager {
         }
     }
 
-    public static void triggerExtend(String elementId, String direction, double targetValue, double duration, double decay, double defaultValue, double extendTime, String easing) {
+    public static void triggerExtend(String elementId, String direction, double targetValue, double decay, double defaultValue, double extendTime, String easing) {
         if (activeElements.containsKey(elementId)) {
             GuiElement element = activeElements.get(elementId);
             ExtendState state = extendStates.get(elementId);
             if (state == null) {
-                state = new ExtendState(direction, targetValue, duration, decay, defaultValue, extendTime, easing);
+                state = new ExtendState(direction, targetValue, decay, defaultValue, extendTime, easing);
                 extendStates.put(elementId, state);
             }
             state.lastBeatTime = System.currentTimeMillis();

@@ -16,7 +16,6 @@ public class RegisterAudioElementAction implements Action {
     @SerializedName("max_volume")
     private float maxVolume;
     private List<AudioEffect> effects;
-    private String direction;
     @SerializedName("easing_type")
     private String easingType;
 
@@ -42,10 +41,6 @@ public class RegisterAudioElementAction implements Action {
 
     public List<AudioEffect> getEffects() {
         return effects;
-    }
-
-    public String getDirection() {
-        return direction.toUpperCase();
     }
 
     public String getEasingType() {

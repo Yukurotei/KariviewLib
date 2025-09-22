@@ -9,7 +9,7 @@ public class StepSpriteEffect extends AudioEffect {
     private int spriteStep;
     @SerializedName("loop")
     private boolean loopSprite;
-    @SerializedName("delay")
+    @SerializedName("duration")
     private int delay;
 
     public StepSpriteEffect(String type) {

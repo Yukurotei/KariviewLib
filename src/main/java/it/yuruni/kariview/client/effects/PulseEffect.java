@@ -4,8 +4,8 @@ import com.google.gson.annotations.SerializedName;
 
 public class PulseEffect extends AudioEffect {
 
-    @SerializedName("decay_duration")
-    private float decay;
+    @SerializedName("decay")
+    private double decay;
     @SerializedName("default_scale")
     private float defaultValue;
     @SerializedName("max_scale")
@@ -15,7 +15,7 @@ public class PulseEffect extends AudioEffect {
         super(type);
     }
 
-    public float getDecay() {
+    public double getDecay() {
         return decay;
     }
 

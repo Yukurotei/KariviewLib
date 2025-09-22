@@ -175,7 +175,6 @@ public class BeatDetector {
                             elementId,
                             extendEffect.getDirection(),
                             extendValue,
-                            extendEffect.getDuration(),
                             extendEffect.getDecay(),
                             extendEffect.getDefaultValue(),
                             extendEffect.getExtendTime(),

@@ -93,7 +93,7 @@
               "type": "STEP_SPRITE",
               "step": 1,
               "loop": true,
-              "delay": 150
+              "duration": 150
             },
             {
               "type": "EXTEND",
