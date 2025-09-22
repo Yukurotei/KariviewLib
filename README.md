@@ -1,6 +1,8 @@
 # KariView Library (PUBLIC ALPHA)
 The ultimate minecraft HUD animation library, capable of displaying anything. Yes, of course you can make your powerpoint presentation with this.
 
+This mod is for 1.20.1 FORGE
+
 # Documentation (PLEASE READ CAREFULLY)
 
 Below concludes all the information you need to make an animation.
