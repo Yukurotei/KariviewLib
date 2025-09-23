@@ -9,6 +9,8 @@ Below concludes all the information you need to make an animation.
 
 For first timers, please read carefully. if you do something wrong the game WILL crash.
 
+I advise you to learn how .json files works before continuing, as you will run into a lot of errors if you don't even know the basics.
+
 ### Directory structure
 
 Everything is contained in your .minecraft/kariviewlib directory.
@@ -16,6 +18,8 @@ Everything is contained in your .minecraft/kariviewlib directory.
 It is designed to be similar to how datapacks are organized.
 
 For first timers: everything besides .minecraft/ and things fully capitalized are to be spelt out EXACTLY like how it is written, unless specified as examples or named as "example"
+
+Word of advice: Don't copy and paste everything, type as the documentation goes.
 
 ```text
 .minecraft/
@@ -75,10 +79,13 @@ An example would be:
 ```json5
 "elements": [
     {
-      "element_id": "example_image", //This id is what you put in instead of your texture path for your actions
+      "element_id": "example_image", //This id is what you put in for element_id fields
       "texture_path": "example.png" //This is the texture path of the image.
-       //texture_path will automatically look in YOUR_NAMESPACE(name of your namespace)/assets/textures
+       //texture_path will automatically look in (look below) 
+       //YOUR_NAMESPACE(name of your namespace)/assets/textures
+       //For this example, you have to put example.png under assets/textures/
     },
+    //Below is advanced usage of elements, takes advantage of the sprite animation system
     {
       "element_id": "animated_sprite",
       "texture_path_pattern": "megaknight*.png"
@@ -88,29 +95,44 @@ An example would be:
 ],
 ```
 
-Sounds are not defined here, since it is unessesary.
+Sounds are **not** defined here.
 
 ## Actions
-### Note: All actions are to be written like this
+### Note: All actions are to be written like this (in the actual .json file)
 ```json5
 {
   "keyframes": [
     {
-      "timestamp": 0, //This is just example
+      "timestamp": 0, //This is just example timestamp, similar to above
       "actions": [
         {
           "type": "example_action", //EXAMPLE, usually will be the action you want to execute, like show_element
           "parameter1": 1, //Below are all examples, it will be different in real use
           "parameter2": true,
           "easing": "easeOutBack"
+        },
+        {
+          "type": "example_action2",
+          "parameter3": "blablabla"
         }
       ]
+    },
+    {
+      "timestamp": 1000, //Example, executes after 1 second
+      "actions": [
+        {
+          //...
+        }
+      ]
+      //...
     }
   ]
 }
 ```
 
-Definitions of elements would be structured like this in the animation json:
+Definitions of elements would be structured like this below:
+
+(don't write this in the actual json file, this is just to tell you how the definitions will be listed below, and the parameters)
 
 ### ElementAction (this is not a real action)
 ```text
@@ -120,7 +142,7 @@ argument1(type): what argument1 does
 argument2(type): ....
 ```
 
-For y'all non coders:
+For y'all non coders, here's all the types:
 
 string - text
 
@@ -132,15 +154,15 @@ float - decimal or integer (has limit, check google)
 
 double - float but more limit (still has limits)
 
-boolean - true or false
+boolean - true or false (to be spelt out exactly how it's worded, all lower case)
 
 ## Below indicates all implemented actions (Sorted alphabetically)
 
-Note: All X, Y, related arguments are in PERCENTAGES(decimal form, e.g. 40% will be 0.4).
+Note: All X, Y, and scale related arguments are in PERCENTAGES(decimal form, e.g. 40% will be 0.4).
 
 This is the case because every one plays the game on different resolution, this keeps it scaled and position correctly for everyone.
 
-If the definition has (SPRITES ONLY), it is only used for SPRITE ELEMENTS (the ones that use texture_path_pattern)
+If the definition has SPRITES ONLY listed, it is only used for SPRITE ELEMENTS (the elements that use texture_path_pattern, or in other words the elements that uses the sprite animation system)
 
 All durations and intervals CAN NOT BE ZERO
 
@@ -199,7 +221,7 @@ Rotates the element
 ```text
 type: rotate_element
 element_id(string): the element to rotate
-target_angle(double): the degree of the angle
+target_angle(double): the degree of the angle (can go over 360)
 duration(long): how long the rotation should last (speed in some way)
 easing_type(string): type of easing, relate to easings section below
 ```
