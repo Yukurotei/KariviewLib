@@ -424,6 +424,11 @@ To play an animation:
 
 I think you can figure the rest out by yourself :D
 
+# FAQ
+Q: Why isn't my animation playing?
+
+A: Every element immedietly hides after the last keyframe is executed. You can temporarily put a random action at keyframe 999999 (or something similar) while making the animation to avoid that behavior.
+
 # Developer stuff
 
 ## Contribution
