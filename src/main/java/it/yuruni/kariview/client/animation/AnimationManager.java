@@ -56,11 +56,14 @@ public class AnimationManager {
 
     private record RotateState(long startTime, double startAngle, double targetAngle, long duration, String easingType) {}
 
-    public static void displayTemporaryElement(String elementId, String namespace, String texturePath, double x, double y, double scale, int textureWidth, int textureHeight) {
+    public static boolean displayTemporaryElement(String elementId, String namespace, String texturePath, double x, double y, double scale, int textureWidth, int textureHeight) {
         ResourceLocation textureResource = AssetManager.loadTexture(namespace, texturePath);
         if (textureResource != null) {
             GuiElement newElement = new GuiElement(textureResource, x, y, scale, scale, textureWidth, textureHeight);
             temporaryElements.put(elementId, newElement);
+            return true;
+        } else {
+            return false;
         }
     }
 

@@ -6,6 +6,7 @@ import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import it.yuruni.kariview.Kariview;
+import it.yuruni.kariview.client.KariviewRenderer;
 import it.yuruni.kariview.client.animation.AnimationManager;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
@@ -60,14 +61,20 @@ public class KariViewClientCommands {
         int textureWidth = IntegerArgumentType.getInteger(ctx, "textureWidth");
         int textureHeight = IntegerArgumentType.getInteger(ctx, "textureHeight");
 
-        AnimationManager.displayTemporaryElement(elementId, namespace, texturePath, x, y, scale, textureWidth, textureHeight);
-
-        ctx.getSource().sendSuccess(() -> Component.literal("Displaying temporary element: " + elementId), false);
-        return 1;
+        boolean isSuccess = AnimationManager.displayTemporaryElement(elementId, namespace, texturePath, x, y, scale, textureWidth, textureHeight);
+        if (isSuccess) {
+            KariviewRenderer.isGuiActive = true;
+            ctx.getSource().sendSuccess(() -> Component.literal("Displaying temporary element: " + elementId), false);
+            return 1;
+        } else {
+            ctx.getSource().sendFailure(Component.literal("An error occurred while trying to display that image. Did you spell out everything correctly? Make sure to include file extensions!"));
+            return 0;
+        }
     }
 
     private static int executeHideAllElementsClient(CommandContext<CommandSourceStack> ctx) {
         AnimationManager.hideAllTemporaryElements();
+        KariviewRenderer.isGuiActive = false;
 
         ctx.getSource().sendSuccess(() -> Component.literal("Hiding all temporary elements."), false);
         return 1;
