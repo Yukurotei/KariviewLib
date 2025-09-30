@@ -1,6 +1,29 @@
 {
   "id": "lauderAnimations",
   "elements": [
-
+    {
+      "element_id": "javaLogo",
+      "texture_path": "java_logo.png"
+    },
+    {
+      "element_id": "reviewPic",
+      "texture_path": "review.png"
+    }
+  ],
+  "keyframes": [
+    {
+      "timestamp": 0,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "javaLogo",
+          "x": -0.15,
+          "y": 0.06,
+          "scale": 0.5,
+          "texture_width": 800,
+          "texture_height": 600
+        }
+      ]
+    }
   ]
 }
