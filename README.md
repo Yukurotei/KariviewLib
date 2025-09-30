@@ -429,6 +429,15 @@ Q: Why isn't my animation showing anything?
 
 A: Every element immediately hides after the last keyframe is executed. You can temporarily put a random action at keyframe 999999 (or something similar) while making the animation to avoid that behavior.
 
+# Future Features
+Render Layers (which element to render on top of which one)
+
+Shader effects
+
+Sound modifiers (e.g. muffled sound)
+
+Game interactions (Wait for something to happen, like take damage, inventory swap. Also elements that reacts to values, like speed, health, hunger, etc. Might also include mouse handling, and button definitions)
+
 # Developer stuff
 
 ## Contribution
