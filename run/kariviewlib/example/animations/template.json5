@@ -78,14 +78,14 @@
         },
         {
           "type": "play_sound",
-          "sound_id": "example2.ogg",
+          "sound_id": "example.ogg",
           "volume": 0.5
         },
         {
           "type": "register_audio_element",
           "element_id": "teto",
           "sensitivity": 0.8,
-          "max_hertz": 120,
+          "max_hertz": 352,
           "min_hertz": 10,
           "max_volume": 2,
           "effects": [
@@ -96,15 +96,13 @@
               "duration": 150 //Some comment
             },
             {
-              "type": "EXTEND",
-              "target_value": 2,
-              "direction": "LEFT",
-              "default_value": 1,
-              "decay": 150,
-              "extend_duration": 100
+              "type": "PULSE",
+              "default_scale": 1,
+              "max_scale": 1.5,
+              "decay": 200
             }
           ],
-          "easing_type": "easeInOutBack"
+          "easing_type": "easeOutQuad"
         }
       ]
     },
