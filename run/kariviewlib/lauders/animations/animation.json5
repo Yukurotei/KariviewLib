@@ -8,6 +8,14 @@
     {
       "element_id": "reviewPic",
       "texture_path": "review.png"
+    },
+    {
+      "element_id": "diveIn",
+      "texture_path": "dive_in.png"
+    },
+    {
+      "element_id": "arrow",
+      "texture_path": "arrow.png"
     }
   ],
   "keyframes": [
@@ -18,10 +26,77 @@
           "type": "show_element",
           "element_id": "javaLogo",
           "x": -0.15,
-          "y": 0.06,
+          "y": 1.06,
           "scale": 0.5,
           "texture_width": 800,
           "texture_height": 600
+        },
+        {
+          "type": "move_element",
+          "element_id": "javaLogo",
+          "target_x": -0.15,
+          "target_y": 0.06,
+          "duration": 1000,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "reviewPic",
+          "x": -1.2,
+          "y": 1.06,
+          "scale": 0.2,
+          "texture_width": 25,
+          "texture_height": 20
+        },
+        {
+          "type": "move_element",
+          "element_id": "reviewPic",
+          "target_x": 0.2,
+          "target_y": 0.06,
+          "duration": 1500,
+          "easing_type": "easeOutQuint"
+        },
+        {
+          "type": "show_element",
+          "element_id": "diveIn",
+          "x": 1.2,
+          "y": -1.3,
+          "scale": 0.4,
+          "texture_width": 82,
+          "texture_height": 57
+        },
+        {
+          "type": "move_element",
+          "element_id": "diveIn",
+          "target_x": 0.2,
+          "target_y": 0.3,
+          "duration": 1500,
+          "easing_type": "easeOutCirc"
+        },
+        {
+          "type": "show_element",
+          "element_id": "arrow",
+          "x": -1.85,
+          "y": 0.4,
+          "scale": 0.2,
+          "texture_width": 19,
+          "texture_height": 35
+        },
+        {
+          "type": "move_element",
+          "element_id": "arrow",
+          "target_x": 0.85,
+          "target_y": 0.4,
+          "duration": 2000,
+          "easing_type": "easeOutQuint"
+        }
+      ]
+    },
+    {
+      "timestamp": 999999999,
+      "actions": [
+        {
+          "type": "stop_all_sounds"
         }
       ]
     }
