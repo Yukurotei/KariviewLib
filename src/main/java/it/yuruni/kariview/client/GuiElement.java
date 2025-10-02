@@ -109,7 +109,6 @@ public class GuiElement {
         int initialWidth = (int) (this.width * screenWidth);
         int initialHeight = (int) (this.height * screenHeight);
 
-        // Apply scale
         int scaledWidth = (int) (initialWidth * xScale);
         int scaledHeight = (int) (initialHeight * yScale);
 

@@ -144,8 +144,6 @@ public class AnimationLoader {
 
             File templateImageFile = new File(texturesDir, "example.png");
             try {
-                // You will need a default image to be copied here. For now, we'll just log
-                // that a placeholder is needed.
                 LOGGER.info("Please add a placeholder image 'example.png' to the textures folder.");
             } catch (Exception e) {
                 LOGGER.error("Failed to create template image file.", e);
