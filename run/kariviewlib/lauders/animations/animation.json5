@@ -20,6 +20,22 @@
     {
       "element_id": "inputVsOutput",
       "texture_path": "input_vs_output.png"
+    },
+    {
+      "element_id": "inputIntro",
+      "texture_path": "input_intro.png"
+    },
+    {
+      "element_id": "inputUsage",
+      "texture_path": "input_example.png"
+    },
+    {
+      "element_id": "outputIntroAndUsage",
+      "texture_path": "output_intro_and_example.png"
+    },
+    {
+      "element_id": "inputAndOutputUsage",
+      "texture_path": "input_and_output_usuage.png"
     }
   ],
   "keyframes": [
@@ -94,16 +110,6 @@
           "duration": 2000,
           "easing_type": "easeOutQuint"
         }
-        /*
-        {
-          "type": "move_element",
-          "element_id": "inputVsOutput",
-          "target_x": -0.05,
-          "target_y": 0.04,
-          "duration": 2500,
-          "easing_type": "easeOutBack"
-        }
-        */
       ]
     },
     {
@@ -156,11 +162,120 @@
           "texture_height": 100
         },
         {
+          "type": "rotate_element",
+          "element_id": "inputVsOutput",
+          "target_angle": 360,
+          "duration": 1000,
+          "easing_type": "easeOutQuad"
+        },
+        {
           "type": "move_element",
           "element_id": "inputVsOutput",
           "target_x": -0.05,
           "target_y": 0.04,
           "duration": 1000,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "inputIntro",
+          "x": -1,
+          "y": 0.1,
+          "scale": 1,
+          "texture_width": 843,
+          "texture_height": 42
+        },
+        {
+          "type": "move_element",
+          "element_id": "inputIntro",
+          "target_x": 0,
+          "target_y": 0.1,
+          "duration": 1500,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "inputUsage",
+          "x": 2,
+          "y": 0.212,
+          "scale": 1,
+          "texture_width": 883,
+          "texture_height": 67
+        },
+        {
+          "type": "move_element",
+          "element_id": "inputUsage",
+          "target_x": 0,
+          "target_y": 0.212,
+          "duration": 2500,
+          "easing_type": "easeOutBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 10000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "inputIntro",
+          "target_x": -2,
+          "target_y": 0.1,
+          "duration": 1000,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "inputUsage",
+          "target_x": -2,
+          "target_y": 0.212,
+          "duration": 1200,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "outputIntroAndUsage",
+          "x": 2,
+          "y": 0.2,
+          "scale": 1,
+          "texture_width": 814,
+          "texture_height": 114
+        },
+        {
+          "type": "move_element",
+          "element_id": "outputIntroAndUsage",
+          "target_x": 0,
+          "target_y": 0.212,
+          "duration": 1700,
+          "easing_type": "easeOutQuint"
+        }
+      ]
+    },
+    {
+      "timestamp": 17000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "outputIntroAndUsage",
+          "target_x": -2,
+          "target_y": 0.212,
+          "duration": 1500,
+          "easing_type": "easeInQuad"
+        },
+        {
+          "type": "show_element",
+          "element_id": "inputAndOutputUsage",
+          "x": 2,
+          "y": 0.2,
+          "scale": 1,
+          "texture_width": 916,
+          "texture_height": 106
+        },
+        {
+          "type": "move_element",
+          "element_id": "inputAndOutputUsage",
+          "target_x": 0,
+          "target_y": 0.2,
+          "duration": 2000,
           "easing_type": "easeOutBack"
         }
       ]
