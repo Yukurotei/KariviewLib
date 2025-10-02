@@ -87,10 +87,10 @@ public class AnimationManager {
     public static void playAnimation(String namespace, String animationId) {
         AnimationData data = AnimationLoader.loadAnimation(namespace, animationId);
         if (data != null) {
-            LOGGER.info("Starting animation: {}", data.getId());
+            //LOGGER.info("Starting animation: {}", data.getId());
             startAnimation(data);
         } else {
-            LOGGER.error("Failed to load animation: {}:{}", namespace, animationId);
+            //LOGGER.error("Failed to load animation: {}:{}", namespace, animationId);
         }
     }
 
@@ -476,7 +476,7 @@ public class AnimationManager {
         }
 
         for (Action action : actions) {
-            LOGGER.info(action.toString());
+            //LOGGER.info(action.toString());
             if (action instanceof ShowElementAction) {
                 handleShowElement((ShowElementAction) action);
                 /*TO CALCULATE WIDTH AND HEIGHT FROM ACTUAL NUMBER TO PERCENTAGE
