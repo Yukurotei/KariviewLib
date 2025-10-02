@@ -16,6 +16,10 @@
     {
       "element_id": "arrow",
       "texture_path": "arrow.png"
+    },
+    {
+      "element_id": "inputVsOutput",
+      "texture_path": "input_vs_output.png"
     }
   ],
   "keyframes": [
@@ -89,6 +93,75 @@
           "target_y": 0.4,
           "duration": 2000,
           "easing_type": "easeOutQuint"
+        }
+        /*
+        {
+          "type": "move_element",
+          "element_id": "inputVsOutput",
+          "target_x": -0.05,
+          "target_y": 0.04,
+          "duration": 2500,
+          "easing_type": "easeOutBack"
+        }
+        */
+      ]
+    },
+    {
+      "timestamp": 3000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "javaLogo",
+          "target_x": -1.15,
+          "target_y": 0.06,
+          "duration": 1000,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "reviewPic",
+          "target_x": -1.2,
+          "target_y": 0.06,
+          "duration": 1500,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "diveIn",
+          "target_x": -1.2,
+          "target_y": 0.3,
+          "duration": 1300,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "arrow",
+          "target_x": -1.85,
+          "target_y": 0.4,
+          "duration": 1400,
+          "easing_type": "easeInBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 4000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "inputVsOutput",
+          "x": 1.05,
+          "y": 1.1,
+          "scale": 0.5,
+          "texture_width": 106,
+          "texture_height": 100
+        },
+        {
+          "type": "move_element",
+          "element_id": "inputVsOutput",
+          "target_x": -0.05,
+          "target_y": 0.04,
+          "duration": 1000,
+          "easing_type": "easeOutBack"
         }
       ]
     },
