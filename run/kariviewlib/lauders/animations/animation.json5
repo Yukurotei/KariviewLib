@@ -36,12 +36,101 @@
     {
       "element_id": "inputAndOutputUsage",
       "texture_path": "input_and_output_usuage.png"
+    },
+    {
+      "element_id": "variablesTitle",
+      "texture_path": "variables_title.png"
+    },
+    {
+      "element_id": "variablesMdHead",
+      "texture_path": "variables_md_head.png"
+    },
+    {
+      "element_id": "variablesTable",
+      "texture_path": "variables_table.png"
+    },
+    {
+      "element_id": "variablesString",
+      "texture_path": "variables_sped.png"
+    },
+    {
+      "element_id": "constructingVariable",
+      "texture_path": "constructing_variable.png"
+    },
+    {
+      "element_id": "variableDeclaration",
+      "texture_path": "variable_declaration.png"
+    },
+    {
+      "element_id": "variableInitialization",
+      "texture_path": "variable_initialization.png"
+    },
+    {
+      "element_id": "variableDoingItInJava",
+      "texture_path": "variable_doing_it_in_java.png"
+    },
+    {
+      "element_id": "arithmeticsTitle",
+      "texture_path": "arithmetics_title.png"
+    },
+    {
+      "element_id": "arithmeticBasic",
+      "texture_path": "arithmetic_basic.png"
+    },
+    {
+      "element_id": "arithmeticExtended",
+      "texture_path": "arithmetic_extended.png"
+    },
+    {
+      "element_id": "arithmeticBEDMAS",
+      "texture_path": "arithmetic_order_of_operations.png"
+    },
+    {
+      "element_id": "concatenationAndCasting",
+      "texture_path": "concatenation_and_casting.png"
+    },
+    {
+      "element_id": "ifStatementsTitle",
+      "texture_path": "if_statements_title.png"
+    },
+    {
+      "element_id": "conditionalLogicPart1",
+      "texture_path": "conditional_logic_pt_1.png"
+    },
+    {
+      "element_id": "conditionalLogicPart2",
+      "texture_path": "conditional_logic_pt_2.png"
+    },
+    {
+      "element_id": "forLoop",
+      "texture_path": "for_loop.png"
+    },
+    {
+      "element_id": "whileLoop",
+      "texture_path": "while_loop.png"
+    },
+    {
+      "element_id": "doWhileLoop",
+      "texture_path": "do_while_loop.png"
+    },
+    {
+      "element_id": "loopsTitle",
+      "texture_path": "loops.png"
+    },
+    {
+      "element_id": "credits",
+      "texture_path": "credits.png"
     }
   ],
   "keyframes": [
     {
       "timestamp": 0,
       "actions": [
+        {
+          "type": "play_sound",
+          "sound_id": "fluffingDuck.ogg",
+          "volume": 1
+        },
         {
           "type": "show_element",
           "element_id": "javaLogo",
@@ -281,7 +370,702 @@
       ]
     },
     {
-      "timestamp": 999999999,
+      "timestamp": 24000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "inputAndOutputUsage",
+          "target_x": -2,
+          "target_y": 0.2,
+          "duration": 1200,
+          "easing_type": "easeInSine"
+        },
+        {
+          "type": "move_element",
+          "element_id": "inputVsOutput",
+          "target_x": 1.05,
+          "target_y": -5.1,
+          "duration": 1200,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "variablesTitle",
+          "x": 0.02,
+          "y": -3.1,
+          "scale": 0.5,
+          "texture_width": 110,
+          "texture_height": 31
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesTitle",
+          "target_x": 0.02,
+          "target_y": -0.1,
+          "duration": 1500,
+          "easing_type": "easeInOutBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 22000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "variablesMdHead",
+          "x": 0.6,
+          "y": 3.03,
+          "scale": 0.3,
+          "texture_width": 411,
+          "texture_height": 186
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesMdHead",
+          "target_x": 0.6,
+          "target_y": 0.03,
+          "duration": 1000,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "variablesTable",
+          "x": 0.5,
+          "y": 2.216,
+          "scale": 0.5,
+          "texture_width": 849,
+          "texture_height": 320
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesTable",
+          "target_x": 0.5,
+          "target_y": 0.216,
+          "duration": 2000,
+          "easing_type": "easeOutExpo"
+        },
+        {
+          "type": "show_element",
+          "element_id": "variablesString",
+          "x": 0.5,
+          "y": 2.45,
+          "scale": 0.5,
+          "texture_width": 875,
+          "texture_height": 148
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesString",
+          "target_x": 0.5,
+          "target_y": 0.216,
+          "duration": 2000,
+          "easing_type": "easeOutExpo"
+        }
+      ]
+    },
+    {
+      "timestamp": 25000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "variablesString",
+          "target_x": 0.5,
+          "target_y": 0.45,
+          "duration": 2000,
+          "easing_type": "easeOutExpo"
+        }
+      ]
+    },
+    {
+      "timestamp": 30000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "constructingVariable",
+          "x": -3,
+          "y": 0.25,
+          "scale": 0.3,
+          "texture_width": 426,
+          "texture_height": 183
+        },
+        {
+          "type": "move_element",
+          "element_id": "constructingVariable",
+          "target_x": 0.0,
+          "target_y": 0.25,
+          "duration": 1000,
+          "easing_type": "easeOutQuad"
+        },
+        {
+          "type": "show_element",
+          "element_id": "variableDeclaration",
+          "x": -2.0,
+          "y": 0.61,
+          "scale": 0.5,
+          "texture_width": 872,
+          "texture_height": 294
+        },
+        {
+          "type": "move_element",
+          "element_id": "variableDeclaration",
+          "target_x": 0.0,
+          "target_y": 0.61,
+          "duration": 2500,
+          "easing_type": "easeOutBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 38000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "variableDeclaration",
+          "target_x": -1,
+          "target_y": 0.61,
+          "duration": 1000,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "variableInitialization",
+          "x": -1,
+          "y": 0.69,
+          "scale": 0.5,
+          "texture_width": 853,
+          "texture_height": 135
+        },
+        {
+          "type": "move_element",
+          "element_id": "variableInitialization",
+          "target_x": 0,
+          "target_y": 0.61,
+          "duration": 1500,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "variableDoingItInJava",
+          "x": 0.5,
+          "y": 1.67,
+          "scale": 0.5,
+          "texture_width": 876,
+          "texture_height": 167,
+        },
+        {
+          "type": "move_element",
+          "element_id": "variableDoingItInJava",
+          "target_x": 0.5,
+          "target_y": 0.65,
+          "duration": 1500,
+          "easing_type": "easeOutBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 45000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "variableInitialization",
+          "target_x": 2,
+          "target_y": 0.61,
+          "duration": 1000,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "constructingVariable",
+          "target_x": -3,
+          "target_y": 0.25,
+          "duration": 1100,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesString",
+          "target_x": 0.5,
+          "target_y": 2.45,
+          "duration": 1050,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesTable",
+          "target_x": 0.5,
+          "target_y": 2.216,
+          "duration": 1000,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesMdHead",
+          "target_x": 0.6,
+          "target_y": 3.03,
+          "duration": 1200,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "variablesTitle",
+          "target_x": 0.02,
+          "target_y": -3.1,
+          "duration": 1234,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "move_element",
+          "element_id": "variableDoingItInJava",
+          "target_x": 0.5,
+          "target_y": 1.67,
+          "duration": 1010,
+          "easing_type": "easeInBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 46000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "arithmeticsTitle",
+          "x": 1.03,
+          "y": -0.15,
+          "scale": 0.5,
+          "texture_width": 215,
+          "texture_height": 28
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticsTitle",
+          "target_x": 0.03,
+          "target_y": -0.15,
+          "duration": 1000,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "arithmeticBasic",
+          "x": 1.55,
+          "y": 0,
+          "scale": 0.4,
+          "texture_width": 871,
+          "texture_height": 464
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticBasic",
+          "target_x": 0.55,
+          "target_y": 0,
+          "duration": 1200,
+          "easing_type": "easeOutQuad"
+        },
+        {
+          "type": "show_element",
+          "element_id": "arithmeticExtended",
+          "x": 0.5,
+          "y": -1.385,
+          "scale": 0.5,
+          "texture_width": 872,
+          "texture_height": 707
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticExtended",
+          "target_x": 0.5,
+          "target_y": 0.385,
+          "duration": 1350,
+          "easing_type": "easeOutBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 49000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "arithmeticBEDMAS",
+          "x": -1,
+          "y": 0.15,
+          "scale": 0.5,
+          "texture_width": 856,
+          "texture_height": 395
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticBEDMAS",
+          "target_x": 0,
+          "target_y": 0.15,
+          "duration": 1200,
+          "easing_type": "easeOutCirc"
+        }
+      ]
+    },
+    {
+      "timestamp": 54000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "arithmeticBEDMAS",
+          "target_x": -1,
+          "target_y": 0.15,
+          "duration": 1200,
+          "easing_type": "easeInBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "concatenationAndCasting",
+          "x": -1.063,
+          "y": 0.45,
+          "scale": 0.5,
+          "texture_width": 875,
+          "texture_height": 653
+        },
+        {
+          "type": "move_element",
+          "element_id": "concatenationAndCasting",
+          "target_x": -0.063,
+          "target_y": 0.45,
+          "duration": 2000,
+          "easing_type": "easeOutQuint"
+        }
+      ]
+    },
+    {
+      "timestamp": 63000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "arithmeticsTitle",
+          "target_x": 1.03,
+          "target_y": -0.15,
+          "duration": 1200,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticBasic",
+          "target_x": 1.55,
+          "target_y": 0,
+          "duration": 1100,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticExtended",
+          "target_x": 0.5,
+          "target_y": -1.385,
+          "duration": 1050,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "arithmeticBEDMAS",
+          "target_x": -1,
+          "target_y": 0.15,
+          "duration": 1234,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "concatenationAndCasting",
+          "target_x": -1.063,
+          "target_y": 0.45,
+          "duration": 1067,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "play_sound",
+          "sound_id": "fluffingDuck.ogg",
+          "volume": 1
+        }
+      ]
+    },
+    {
+      "timestamp": 64000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "ifStatementsTitle",
+          "x": 1.02,
+          "y": 1.1,
+          "scale": 0.5,
+          "texture_width": 220,
+          "texture_height": 22
+        },
+        {
+          "type": "move_element",
+          "element_id": "ifStatementsTitle",
+          "target_x": 0.02,
+          "target_y": -0.1,
+          "duration": 1000,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "conditionalLogicPart1",
+          "x": 0.47,
+          "y": -2,
+          "scale": 0.7,
+          "texture_width": 872,
+          "texture_height": 936,
+        },
+        {
+          "type": "move_element",
+          "element_id": "conditionalLogicPart1",
+          "target_x": 0.47,
+          "target_y": 0,
+          "duration": 1200,
+          "easing_type": "easeOutCirc"
+        }
+      ]
+    },
+    {
+      "timestamp": 72000,
+      "actions": [
+        {
+          "type": "extend_element",
+          "element_id": "conditionalLogicPart1",
+          "target_value": 0.5,
+          "duration": 1000,
+          "direction": "UP",
+          "easing_type": "easeOutQuint"
+        },
+        {
+          "type": "move_element",
+          "element_id": "conditionalLogicPart1",
+          "target_x": 0.47,
+          "target_y": 0.2,
+          "duration": 700,
+          "easing_type": "easeOutCirc"
+        },
+        {
+          "type": "show_element",
+          "element_id": "conditionalLogicPart2",
+          "x": 0.47,
+          "y": -1,
+          "scale": 0.7,
+          "texture_width": 877,
+          "texture_height": 1069
+        },
+        {
+          "type": "move_element",
+          "element_id": "conditionalLogicPart2",
+          "target_x": 0.47,
+          "target_y": 0,
+          "duration": 1200,
+          "easing_type": "easeOutCirc"
+        }
+      ]
+    },
+    {
+      "timestamp": 77000,
+      "actions": [
+        {
+          "type": "extend_element",
+          "element_id": "conditionalLogicPart1",
+          "target_value": 1,
+          "duration": 1000,
+          "direction": "UP",
+          "easing_type": "easeInQuint"
+        },
+        {
+          "type": "move_element",
+          "element_id": "conditionalLogicPart1",
+          "target_x": 0.47,
+          "target_y": 0,
+          "duration": 700,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "conditionalLogicPart2",
+          "target_x": 0.47,
+          "target_y": -1,
+          "duration": 1200,
+          "easing_type": "easeInCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "ifStatementsTitle",
+          "target_x": 0.02,
+          "target_y": -1.1,
+          "duration": 1000,
+          "easing_type": "easeInBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 78000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "conditionalLogicPart1",
+          "target_x": 0.47,
+          "target_y": -2,
+          "duration": 1200,
+          "easing_type": "easeOutCirc"
+        }
+      ]
+    },
+    {
+      "timestamp": 79000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "loopsTitle",
+          "x": 0,
+          "y": -1.1,
+          "scale": 0.3,
+          "texture_width": 31,
+          "texture_height": 31
+        },
+        {
+          "type": "move_element",
+          "element_id": "loopsTitle",
+          "target_x": 0,
+          "target_y": 0.1,
+          "duration": 1000,
+          "easing_type": "easeOutBack"
+        },
+        {
+          "type": "rotate_element",
+          "element_id": "loopsTitle",
+          "target_angle": 24120,
+          "duration": 1000,
+          "easing_type": "easeInOutBack"
+        },
+        {
+          "type": "show_element",
+          "element_id": "forLoop",
+          "x": -1.03,
+          "y": 0.5,
+          "scale": 0.5,
+          "texture_width": 865,
+          "texture_height": 547
+        },
+        {
+          "type": "move_element",
+          "element_id": "forLoop",
+          "target_x": -0.03,
+          "target_y": 0.5,
+          "duration": 1300,
+          "easing_type": "easeOutQuart"
+        },
+      ]
+    },
+    {
+      "timestamp": 85000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "whileLoop",
+          "x": 1.5,
+          "y": -0.087,
+          "scale": 0.5,
+          "texture_width": 869,
+          "texture_height": 323
+        },
+        {
+          "type": "move_element",
+          "element_id": "whileLoop",
+          "target_x": 0.5,
+          "target_y": -0.087,
+          "duration": 1300,
+          "easing_type": "easeOutQuad"
+        },
+        {
+          "type": "show_element",
+          "element_id": "doWhileLoop",
+          "x": 0.5,
+          "y": 2.59,
+          "scale": 0.5,
+          "texture_width": 875,
+          "texture_height": 324
+        },
+        {
+          "type": "move_element",
+          "element_id": "doWhileLoop",
+          "target_x": 0.5,
+          "target_y": 0.59,
+          "duration": 2300,
+          "easing_type": "easeOutBack"
+        }
+      ]
+    },
+    {
+      "timestamp": 92000,
+      "actions": [
+        {
+          "type": "move_element",
+          "element_id": "loopsTitle",
+          "target_x": 0,
+          "target_y": -1.1,
+          "duration": 1000,
+          "easing_type": "easeInQuad"
+        },
+        {
+          "type": "move_element",
+          "element_id": "forLoop",
+          "target_x": -1.03,
+          "target_y": 0.5,
+          "duration": 1200,
+          "easing_type": "easeInQuad"
+        },
+        {
+          "type": "move_element",
+          "element_id": "whileLoop",
+          "target_x": 1.5,
+          "target_y": -0.087,
+          "duration": 1100,
+          "easing_type": "easeInQuad"
+        },
+        {
+          "type": "move_element",
+          "element_id": "doWhileLoop",
+          "target_x": 0.5,
+          "target_y": 2.59,
+          "duration": 1050,
+          "easing_type": "easeInQuad"
+        },
+        {
+          "type": "show_element",
+          "element_id": "credits",
+          "x": 0.25,
+          "y": 2,
+          "scale": 0.5,
+          "texture_width": 615,
+          "texture_height": 181
+        },
+        {
+          "type": "register_audio_element",
+          "element_id": "credits",
+          "sensitivity": 1,
+          "max_hertz": 200,
+          "min_hertz": 30,
+          "max_volume": 2,
+          "effects": [
+            {
+              "type": "PULSE",
+              "decay": 500,
+              "default_scale": 0.8,
+              "max_scale": 1.1
+            }
+          ],
+          "easing_type": "easeInOutCirc"
+        },
+        {
+          "type": "move_element",
+          "element_id": "credits",
+          "target_x": 0.25,
+          "target_y": 0,
+          "duration": 1000,
+          "easing_type": "easeOutCirc"
+        }
+      ]
+    },
+    {
+      "timestamp": 126000,
       "actions": [
         {
           "type": "stop_all_sounds"
