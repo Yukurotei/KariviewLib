@@ -118,6 +118,14 @@
       "texture_path": "loops.png"
     },
     {
+      "element_id": "errorsAndExceptions",
+      "texture_path": "errors_and_exceptions.png"
+    },
+    {
+      "element_id": "tryAndCatch",
+      "texture_path": "try_and_catch.png"
+    },
+    {
       "element_id": "credits",
       "texture_path": "credits.png"
     }
@@ -1028,6 +1036,7 @@
           "duration": 1050,
           "easing_type": "easeInQuad"
         },
+        /*
         {
           "type": "show_element",
           "element_id": "credits",
@@ -1061,6 +1070,52 @@
           "target_y": 0,
           "duration": 1000,
           "easing_type": "easeOutCirc"
+        }
+        */
+      ]
+    },
+    {
+      "timestamp": 93000,
+      "actions": [
+        //TODO: show title
+        {
+          "type": "show_element",
+          "element_id": "errorsAndExceptions",
+          "x": 1.5,
+          "y": 0,
+          "scale": 0.67,
+          "texture_width": 680,
+          "texture_height": 758
+        },
+        {
+          "type": "move_element",
+          "element_id": "errorsAndExceptions",
+          "target_x": 0.5,
+          "target_y": 0,
+          "duration": 1234,
+          "easing_type": "easeOutCirc"
+        }
+      ]
+    },
+    {
+      "timestamp": 97000,
+      "actions": [
+        {
+          "type": "show_element",
+          "element_id": "tryAndCatch",
+          "x": -0.04,
+          "y": -2.5,
+          "scale": 0.5,
+          "texture_width": 672,
+          "texture_height": 446
+        },
+        {
+          "type": "move_element",
+          "element_id": "tryAndCatch",
+          "target_x": -0.04,
+          "target_y": 0.5,
+          "duration": 1320,
+          "easing_type": "easeOutBack"
         }
       ]
     },
