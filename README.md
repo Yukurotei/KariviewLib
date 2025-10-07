@@ -96,7 +96,7 @@ An example would be:
 ],
 ```
 
-All elements will be rendered in natrual (alphabetical) order.
+All elements will be rendered in natural (alphabetical) order.
 
 Sounds are **not** defined here.
 
