@@ -29,13 +29,13 @@ public class AnimationManager {
     private static final ConcurrentMap<String, GuiElement> activeElements = new ConcurrentHashMap<>();
     private static int lastKeyframeIndex = -1;
 
-    public static final Map<String, SpriteState> spriteStates = new HashMap<>();
-    private static final Map<String, Long> spriteUpdateIntervals = new HashMap<>();
-    private static final Map<String, AnimatedStepState> animatedStepStates = new HashMap<>();
-    private static final Map<String, ScaleState> scalingStates = new HashMap<>();
-    private static final Map<String, FadeState> fadingStates = new HashMap<>();
-    private static final Map<String, MoveState> movingStates = new HashMap<>();
-    private static final Map<String, RotateState> rotatingStates = new HashMap<>();
+    public static final ConcurrentMap<String, SpriteState> spriteStates = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, Long> spriteUpdateIntervals = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, AnimatedStepState> animatedStepStates = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, ScaleState> scalingStates = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, FadeState> fadingStates = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, MoveState> movingStates = new ConcurrentHashMap<>();
+    private static final ConcurrentMap<String, RotateState> rotatingStates = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, PulseState> pulseStates = new ConcurrentHashMap<>();
     private static final ConcurrentMap<String, ExtendState> extendStates = new ConcurrentHashMap<>();
 
@@ -769,6 +769,6 @@ public class AnimationManager {
         Map<String, GuiElement> allElements = new HashMap<>();
         allElements.putAll(activeElements);
         allElements.putAll(temporaryElements);
-        return allElements;
+        return new TreeMap<>(allElements);
     }
 }

@@ -19,8 +19,6 @@ It is designed to be similar to how datapacks are organized.
 
 For first timers: everything besides .minecraft/ and things fully capitalized are to be spelt out EXACTLY like how it is written, unless specified as examples or named as "example"
 
-Word of advice: Don't copy and paste everything, type as the documentation goes.
-
 ```text
 .minecraft/
     | kariviewlib
@@ -42,16 +40,19 @@ Word of advice: Don't copy and paste everything, type as the documentation goes.
 
 All animations and actions are inside a json file (.json, .json5 is fine as well)
 
+Word of advice: Don't copy and paste everything, type as the documentation goes.
+
 ```json5
 {
-  "id": "ANIMATION_IDENTIFIER", //This is the identifier for the animation. This isn't used and can be named anything.
-  "elements": [ //This is where all the elements is initialized
+  "id": "ANIMATION_IDENTIFIER", //This is the identifier for the animation.
+  //This isn't used and can be named anything.
+  "elements": [ //This is where all the elements is initialized (textures)
     {
 
     }
   ],
   "keyframes": [ //Contains all the actions to be executed at a certain timestamp
-    //NOTE: Timestamp is calculated at milliseconds
+    //NOTE: Timestamp is calculated in milliseconds
     {
       "timestamp": 0,
       "actions": [ //Contains all the actions to be executed
@@ -94,6 +95,8 @@ An example would be:
     }
 ],
 ```
+
+All elements will be rendered in natrual (alphabetical) order.
 
 Sounds are **not** defined here.
 
