@@ -3,6 +3,7 @@ package it.yuruni.kariview.client;
 import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.Kariview;
 import it.yuruni.kariview.client.animation.AnimationManager;
+import it.yuruni.kariview.client.shader.ShaderManager;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.client.event.RenderGuiOverlayEvent;
@@ -24,7 +25,10 @@ public class KariviewRenderer {
         GuiGraphics guiGraphics = event.getGuiGraphics();
 
         for (GuiElement element : AnimationManager.getActiveElements().values()) {
+            int programId = ShaderManager.getShaderProgram(element.getShaderId());
+            ShaderManager.useShader(programId, event.getPartialTick());
             element.render(guiGraphics);
+            ShaderManager.stopShader();
         }
     }
 }

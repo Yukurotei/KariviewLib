@@ -430,7 +430,7 @@ I think you can figure the rest out by yourself :D
 # FAQ
 Q: Why isn't my animation showing anything?
 
-A: Every element immediately hides after the last keyframe is executed. You can temporarily put a random action at keyframe 999999 (or something similar) while making the animation to avoid that behavior.
+A: Every element immediately hides after the last keyframe is executed. You can temporarily put a random action at keyframe 999999 (or something similar) to avoid that behavior.
 
 # Future Features (TODOS)
 Render Layers (which element to render on top of which one) [DONE]
