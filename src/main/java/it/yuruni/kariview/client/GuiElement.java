@@ -7,6 +7,12 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiGraphics;
 import net.minecraft.resources.ResourceLocation;
 import org.joml.Matrix4f;
+import org.lwjgl.opengl.GL11;
+import org.lwjgl.opengl.GL15;
+import org.lwjgl.opengl.GL20;
+import org.lwjgl.opengl.GL30;
+
+import java.nio.ByteBuffer;
 
 public class GuiElement {
     private ResourceLocation texture;
@@ -120,48 +126,14 @@ public class GuiElement {
             scaledWidth = (int) (scaledHeight * aspect);
         }
 
-        scaledWidth = (int) (scaledWidth * xScale); //Recalculate scale
+        scaledWidth = (int) (scaledWidth * xScale);
         scaledHeight = (int) (scaledHeight * yScale);
 
         // Center the scaled element
         int drawX = initialX - (scaledWidth - initialWidth) / 2;
         int drawY = initialY - (scaledHeight - initialHeight) / 2;
 
-        guiGraphics.pose().pushPose();
-
-        // Translate to the center of the element for rotation
-        guiGraphics.pose().translate(drawX + scaledWidth / 2.0, drawY + scaledHeight / 2.0, 0);
-        guiGraphics.pose().mulPose(Axis.ZP.rotationDegrees((float) this.angle));
-
-        Matrix4f matrix = guiGraphics.pose().last().pose();
-
-        RenderSystem.setShaderTexture(0, this.texture);
-        RenderSystem.enableBlend();
-        RenderSystem.defaultBlendFunc();
-
-        Tesselator tesselator = Tesselator.getInstance();
-        BufferBuilder bufferbuilder = tesselator.getBuilder();
-        bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-
-        float halfWidth = scaledWidth / 2.0f;
-        float halfHeight = scaledHeight / 2.0f;
-
-        int r = 255, g = 255, b = 255;
-        int a = (int) (this.opacity * 255);
-
-        // Draw the quad centered around (0,0) so the rotation works correctly.
-        // The matrix will transform it to the correct position on screen.
-        bufferbuilder.vertex(matrix, -halfWidth, -halfHeight, 0).uv(0, 0).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(matrix, -halfWidth, halfHeight, 0).uv(0, 1).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(matrix, halfWidth, halfHeight, 0).uv(1, 1).color(r, g, b, a).endVertex();
-        bufferbuilder.vertex(matrix, halfWidth, -halfHeight, 0).uv(1, 0).color(r, g, b, a).endVertex();
-
-        //draw with shader
-        BufferUploader.drawWithShader(bufferbuilder.end());
-
-        RenderSystem.disableBlend();
-
-        guiGraphics.pose().popPose();
+        guiGraphics.blit(this.texture, drawX, drawY, 0, 0, scaledWidth, scaledHeight, scaledWidth, scaledHeight);
     }
 
 

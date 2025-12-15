@@ -1,14 +1,16 @@
 #version 150
 
-uniform sampler2D Sampler0;
+uniform float Time;
 
-in vec2 texCoord;
 in vec4 vertexColor;
 
 out vec4 fragColor;
 
 void main() {
-    vec4 texColor = texture(Sampler0, texCoord);
-    // Diagnostic: Make everything red
-    fragColor = vec4(1.0, 0.0, 0.0, texColor.a) * vertexColor;
+    // Pure red overlay
+    fragColor = vec4(1.0, 0.0, 0.0, 0.5);
+
+    // Or make it pulse with time:
+    // float pulse = (sin(Time * 2.0) + 1.0) / 2.0;
+    // fragColor = vec4(1.0, 0.0, 0.0, pulse * 0.5);
 }

@@ -1,11 +1,13 @@
 package it.yuruni.kariview.client.shader;
 
 import com.mojang.blaze3d.systems.RenderSystem;
+import com.mojang.blaze3d.vertex.PoseStack;
 import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.Kariview;
 import net.minecraft.client.Minecraft;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.packs.resources.Resource;
+import org.joml.Matrix4f;
 import org.lwjgl.opengl.GL11;
 import org.lwjgl.opengl.GL20;
 import org.slf4j.Logger;
@@ -99,7 +101,12 @@ public class ShaderManager {
         Map<String, Integer> uniforms = new HashMap<>();
         uniforms.put("Time", GL20.glGetUniformLocation(program, "Time"));
         uniforms.put("AspectRatio", GL20.glGetUniformLocation(program, "AspectRatio"));
-        uniforms.put("Sampler", GL20.glGetUniformLocation(program, "Sampler"));
+        uniforms.put("Sampler", GL20.glGetUniformLocation(program, "Sampler0"));
+        LOGGER.info("Uniform locations - ModelViewMat: {}, ProjMat: {}, Sampler0: {}",
+                GL20.glGetUniformLocation(program, "ModelViewMat"),
+                GL20.glGetUniformLocation(program, "ProjMat"),
+                GL20.glGetUniformLocation(program, "Sampler0"));
+
         UNIFORM_LOCATION_CACHE.put(program, uniforms);
 
         // Set the sampler to texture unit 0. This only needs to be done once.
@@ -117,29 +124,88 @@ public class ShaderManager {
     /**
      * Binds a shader program by its ID and sets common uniforms.
      */
-    public static void useShader(int programId, float partialTicks) {
-        //LOGGER.info("Using shader {}", programId);
+    public static void useShader(int programId, float partialTicks, PoseStack poseStack) {
         if (programId > 0) {
-            //LOGGER.info("Program ID is valid: {}", programId);
             RenderSystem.assertOnRenderThread();
             GL20.glUseProgram(programId);
+
+            // Get the current matrices from the pose stack
+            Matrix4f modelViewMatrix = new Matrix4f(RenderSystem.getModelViewMatrix());
+            modelViewMatrix.mul(poseStack.last().pose());
+
+            // Set ModelViewMat uniform
+            int modelViewLoc = GL20.glGetUniformLocation(programId, "ModelViewMat");
+            if (modelViewLoc != -1) {
+                float[] matrixData = new float[16];
+                modelViewMatrix.get(matrixData);
+                GL20.glUniformMatrix4fv(modelViewLoc, false, matrixData);
+            }
+
+            // Set ProjMat uniform
+            int projLoc = GL20.glGetUniformLocation(programId, "ProjMat");
+            if (projLoc != -1) {
+                float[] matrixData = new float[16];
+                RenderSystem.getProjectionMatrix().get(matrixData);
+                GL20.glUniformMatrix4fv(projLoc, false, matrixData);
+            }
+
+            // Set sampler uniform
+            int samplerLoc = GL20.glGetUniformLocation(programId, "Sampler0");
+            if (samplerLoc != -1) {
+                GL20.glUniform1i(samplerLoc, 0);
+            }
 
             if (UNIFORM_LOCATION_CACHE.containsKey(programId)) {
                 Map<String, Integer> uniforms = UNIFORM_LOCATION_CACHE.get(programId);
 
-                // Set matrix uniforms
-                int modelViewLoc = GL20.glGetUniformLocation(programId, "ModelViewMat");
-                int projLoc = GL20.glGetUniformLocation(programId, "ProjMat");
-
-                if (modelViewLoc != -1) {
-                    RenderSystem.getModelViewMatrix().get(new float[16]);
-                    GL20.glUniformMatrix4fv(modelViewLoc, false, RenderSystem.getModelViewMatrix().get(new float[16]));
+                // Update Time uniform
+                int timeLoc = uniforms.getOrDefault("Time", -1);
+                if (timeLoc != -1) {
+                    long gameTime = Minecraft.getInstance().level != null ? Minecraft.getInstance().level.getGameTime() : 0;
+                    float time = (gameTime + partialTicks) / 20.0f;
+                    GL20.glUniform1f(timeLoc, time);
                 }
 
-                if (projLoc != -1) {
-                    RenderSystem.getProjectionMatrix().get(new float[16]);
-                    GL20.glUniformMatrix4fv(projLoc, false, RenderSystem.getProjectionMatrix().get(new float[16]));
+                // Update AspectRatio uniform
+                int aspectLoc = uniforms.getOrDefault("AspectRatio", -1);
+                if (aspectLoc != -1) {
+                    var window = Minecraft.getInstance().getWindow();
+                    float aspectRatio = (float) window.getGuiScaledWidth() / (float) window.getGuiScaledHeight();
+                    GL20.glUniform1f(aspectLoc, aspectRatio);
                 }
+            }
+        }
+    }
+
+    public static void useShaderWithMatrices(int programId, float partialTicks, Matrix4f modelViewMatrix, Matrix4f projectionMatrix) {
+        if (programId > 0) {
+            RenderSystem.assertOnRenderThread();
+            GL20.glUseProgram(programId);
+
+            // Set ModelViewMat uniform
+            int modelViewLoc = GL20.glGetUniformLocation(programId, "ModelViewMat");
+            if (modelViewLoc != -1) {
+                float[] matrixData = new float[16];
+                modelViewMatrix.get(matrixData);
+                GL20.glUniformMatrix4fv(modelViewLoc, false, matrixData);
+            }
+
+            // Set ProjMat uniform
+            int projLoc = GL20.glGetUniformLocation(programId, "ProjMat");
+            if (projLoc != -1) {
+                float[] matrixData = new float[16];
+                projectionMatrix.get(matrixData);
+                GL20.glUniformMatrix4fv(projLoc, false, matrixData);
+            }
+
+            // Set sampler uniform
+            int samplerLoc = GL20.glGetUniformLocation(programId, "Sampler0");
+            if (samplerLoc != -1) {
+                GL20.glUniform1i(samplerLoc, 0);
+            }
+
+            if (UNIFORM_LOCATION_CACHE.containsKey(programId)) {
+                Map<String, Integer> uniforms = UNIFORM_LOCATION_CACHE.get(programId);
 
                 // Update Time uniform
                 int timeLoc = uniforms.getOrDefault("Time", -1);
@@ -164,6 +230,9 @@ public class ShaderManager {
      * Stops using the current shader program.
      */
     public static void stopShader() {
+        // Unbind our custom shader program
+        GL20.glUseProgram(0);
+
         // Restore to a default shader to prevent state pollution for subsequent rendering
         RenderSystem.setShader(GameRenderer::getPositionTexShader);
     }
