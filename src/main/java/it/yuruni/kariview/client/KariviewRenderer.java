@@ -17,7 +17,7 @@ import org.slf4j.Logger;
 public class KariviewRenderer {
     private static final Logger LOGGER = LogUtils.getLogger();
     public static boolean isGuiActive = false, renderShaderOnTop = false;
-    public static String activeFullscreenShader = "default";
+    public static String activeFullscreenShader = null;
 
     @SubscribeEvent
     public static void onRenderGui(RenderGuiOverlayEvent.Post event) {
@@ -26,17 +26,17 @@ public class KariviewRenderer {
 
         GuiGraphics guiGraphics = event.getGuiGraphics();
 
-        // Render GUI elements first
         for (GuiElement element : AnimationManager.getActiveElements().values()) {
             element.render(guiGraphics);
         }
 
-        // Render fullscreen shader on top
+        /*
         if (activeFullscreenShader != null) {
             int programId = ShaderManager.getShaderProgram(activeFullscreenShader);
             if (programId > 0) {
                 FullscreenShaderRenderer.renderFullscreenShader(guiGraphics, programId, event.getPartialTick());
             }
         }
+         */
     }
 }

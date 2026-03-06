@@ -1,8 +1,15 @@
 package it.yuruni.kariview.client.data.actions;
 
 import com.google.gson.annotations.SerializedName;
+import com.mojang.logging.LogUtils;
+import it.yuruni.kariview.client.GuiElement;
+import it.yuruni.kariview.client.animation.states.AnimationContext;
+import it.yuruni.kariview.client.animation.states.ScaleState;
+import org.slf4j.Logger;
 
 public class ExtendAction implements Action {
+    private static final Logger LOGGER = LogUtils.getLogger();
+
     @SerializedName("element_id")
     private String elementId;
     @SerializedName("target_value")
@@ -30,5 +37,38 @@ public class ExtendAction implements Action {
 
     public String getEasingType() {
         return easingType;
+    }
+
+    @Override
+    public void execute(AnimationContext ctx) {
+        GuiElement element = ctx.activeElements.get(elementId);
+        if (element != null) {
+            double targetX = element.getXScale();
+            double targetY = element.getYScale();
+            switch (direction.toUpperCase()) {
+                case "LEFT":
+                case "RIGHT":
+                    targetX = targetValue;
+                    break;
+                case "UP":
+                case "DOWN":
+                    targetY = targetValue;
+                    break;
+            }
+            ctx.scalingStates.put(elementId, new ScaleState(
+                    System.currentTimeMillis() - ctx.animationStartTime,
+                    element.getXScale(),
+                    element.getYScale(),
+                    targetX,
+                    targetY,
+                    duration,
+                    direction.toUpperCase(),
+                    element.getX(),
+                    element.getY(),
+                    easingType
+            ));
+        } else {
+            LOGGER.error("ExtendAction: No active element found for id: {}", elementId);
+        }
     }
 }
