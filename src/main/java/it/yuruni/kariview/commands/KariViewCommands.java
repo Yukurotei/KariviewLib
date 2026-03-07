@@ -14,6 +14,8 @@ import it.yuruni.kariview.packets.PacketHandler;
 import it.yuruni.kariview.packets.server2client.StopViewPacket;
 import it.yuruni.kariview.packets.server2client.PlayAnimationPacket;
 import it.yuruni.kariview.packets.server2client.ShowViewPacket;
+import it.yuruni.kariview.packets.server2client.StopAnimationPacket;
+import it.yuruni.kariview.packets.server2client.SetVariablePacket;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.commands.arguments.EntityArgument;
@@ -59,6 +61,25 @@ public class KariViewCommands {
                                 .requires(source -> source.hasPermission(2))
                                 .executes(KariViewCommands::reloadAnimations)
                         )
+                        .then(Commands.literal("stop")
+                                .requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("targets", EntityArgument.players())
+                                        .executes(KariViewCommands::executeStopAnimation)
+                                )
+                        )
+                        .then(Commands.literal("var")
+                                .requires(source -> source.hasPermission(2))
+                                .then(Commands.argument("namespace", StringArgumentType.string())
+                                        .then(Commands.argument("name", StringArgumentType.string())
+                                                .then(Commands.argument("value", StringArgumentType.string())
+                                                        .executes(KariViewCommands::executeSetVar)
+                                                        .then(Commands.argument("targets", EntityArgument.players())
+                                                                .executes(KariViewCommands::executeSetVarTargeted)
+                                                        )
+                                                )
+                                        )
+                                )
+                        )
         );
     }
 
@@ -78,6 +99,36 @@ public class KariViewCommands {
     private static int executeStopView(CommandContext<CommandSourceStack> ctx) {
         ctx.getSource().sendSuccess(() -> Component.literal("Hiding custom view..."), false);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new StopViewPacket());
+        return 1;
+    }
+
+    private static int executeStopAnimation(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer player : players) {
+            PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StopAnimationPacket());
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("Sent stop command to " + players.size() + " player(s)."), false);
+        return 1;
+    }
+
+    private static int executeSetVar(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String namespace = StringArgumentType.getString(ctx, "namespace");
+        String name = StringArgumentType.getString(ctx, "name");
+        String value = StringArgumentType.getString(ctx, "value");
+        PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SetVariablePacket(namespace, name, value));
+        ctx.getSource().sendSuccess(() -> Component.literal("Set " + namespace + "." + name + " = " + value + " for all players."), false);
+        return 1;
+    }
+
+    private static int executeSetVarTargeted(CommandContext<CommandSourceStack> ctx) throws CommandSyntaxException {
+        String namespace = StringArgumentType.getString(ctx, "namespace");
+        String name = StringArgumentType.getString(ctx, "name");
+        String value = StringArgumentType.getString(ctx, "value");
+        Collection<ServerPlayer> players = EntityArgument.getPlayers(ctx, "targets");
+        for (ServerPlayer player : players) {
+            PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new SetVariablePacket(namespace, name, value));
+        }
+        ctx.getSource().sendSuccess(() -> Component.literal("Set " + namespace + "." + name + " = " + value + " for " + players.size() + " player(s)."), false);
         return 1;
     }
 

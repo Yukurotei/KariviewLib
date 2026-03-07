@@ -5,6 +5,8 @@ import com.google.gson.GsonBuilder;
 import com.mojang.logging.LogUtils;
 import it.yuruni.kariview.client.animation.AssetManager;
 import it.yuruni.kariview.client.data.actions.*;
+import it.yuruni.kariview.client.data.VariableManager;
+import it.yuruni.kariview.client.sound.RawAudio;
 import it.yuruni.kariview.client.effects.AudioEffect;
 import it.yuruni.kariview.client.effects.ExtendEffect;
 import it.yuruni.kariview.client.effects.PulseEffect;
@@ -45,7 +47,11 @@ public class AnimationLoader {
                 .registerSubtype(RotateAction.class, "rotate_element")
                 .registerSubtype(ExtendAction.class, "extend_element")
                 .registerSubtype(RegisterAudioElementAction.class, "register_audio_element")
-                .registerSubtype(UnregisterAudioElementAction.class, "unregister_audio_element");
+                .registerSubtype(UnregisterAudioElementAction.class, "unregister_audio_element")
+                .registerSubtype(ChangeOpacityAction.class, "change_opacity")
+                .registerSubtype(BranchAction.class, "branch")
+                .registerSubtype(PlayAnimationAction.class, "play_animation")
+                .registerSubtype(SetElementParamAction.class, "set_element_param");
 
         RuntimeTypeAdapterFactory<AudioEffect> audioEffectAdapter = RuntimeTypeAdapterFactory.of(AudioEffect.class, "type")
                 .registerSubtype(StepSpriteEffect.class, "STEP_SPRITE")
@@ -62,6 +68,10 @@ public class AnimationLoader {
     public static void loadAllAnimations() {
         ANIMATION_CACHE.clear();
         File mainDir = FMLPaths.GAMEDIR.get().resolve(DATA_PACK_FOLDER).toFile();
+        LOGGER.info("[Loader] FMLPaths.GAMEDIR = {}", FMLPaths.GAMEDIR.get());
+        LOGGER.info("[Loader] user.dir = {}", System.getProperty("user.dir"));
+        LOGGER.info("[Loader] Looking for kariviewlib at: {}", mainDir.getAbsolutePath());
+        LOGGER.info("[Loader] Exists: {}", mainDir.exists());
         if (!mainDir.exists()) {
             LOGGER.warn("KariviewLib main directory not found. No animations will be loaded.");
             return;
@@ -69,15 +79,16 @@ public class AnimationLoader {
 
         try (Stream<Path> walk = Files.walk(mainDir.toPath())) {
             walk.filter(Files::isRegularFile)
-                    .filter(path -> path.toString().endsWith(".json"))
+                    .filter(path -> path.toString().endsWith(".json") || path.toString().endsWith(".json5"))
                     .forEach(path -> {
                         try {
                             String relativePath = mainDir.toPath().relativize(path).toString().replace(File.separator, "/");
                             String[] parts = relativePath.split("/");
+                            LOGGER.info("[Loader] Found file: {} | parts={}", relativePath, parts.length);
 
                             if (parts.length == 3 && parts[1].equals("animations")) {
                                 String namespace = parts[0];
-                                String animationId = parts[2].replace(".json", "");
+                                String animationId = parts[2].replace(".json5", "").replace(".json", "");
                                 loadAnimation(namespace, animationId);
                                 LOGGER.info("Loading animation {}:{}", namespace, animationId);
                             } else {
@@ -92,6 +103,22 @@ public class AnimationLoader {
         }
 
         AssetManager.loadAllTextures();
+
+        ANIMATION_CACHE.values().forEach(anim ->
+            anim.getKeyframes().forEach(kf ->
+                kf.getActions().stream()
+                    .filter(a -> a instanceof PlaySoundAction)
+                    .map(a -> (PlaySoundAction) a)
+                    .forEach(a -> {
+                        java.io.File f = AssetManager.loadSound(anim.getNamespace(), a.getSoundId());
+                        if (f != null) RawAudio.preloadOgg(f.getAbsolutePath());
+                    })
+            )
+        );
+
+        java.util.Set<String> namespaces = new java.util.HashSet<>();
+        ANIMATION_CACHE.values().forEach(anim -> namespaces.add(anim.getNamespace()));
+        namespaces.forEach(VariableManager::loadVariables);
     }
 
     public static void ensureMainDirectoryExists() {

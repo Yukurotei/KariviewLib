@@ -7,6 +7,9 @@ import it.yuruni.kariview.client.animation.states.*;
 import it.yuruni.kariview.client.data.AnimationData;
 import it.yuruni.kariview.client.data.AnimationLoader;
 import it.yuruni.kariview.client.data.Keyframe;
+import it.yuruni.kariview.client.data.StopAnimationData;
+import it.yuruni.kariview.client.data.VariableManager;
+import it.yuruni.kariview.client.data.VariableWatch;
 import it.yuruni.kariview.client.data.actions.Action;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
 import it.yuruni.kariview.client.sound.BeatDetector;
@@ -40,6 +43,15 @@ public class AnimationManager {
 
     private static final ConcurrentMap<String, GuiElement> temporaryElements = new ConcurrentHashMap<>();
 
+    private static boolean isWaiting = false;
+    private static boolean isPlayingStopAnim = false;
+    private static long stopAnimStartTime = 0;
+    private static int stopKeyframeIndex = -1;
+    private static final ConcurrentMap<String, String> lastWatchValues = new ConcurrentHashMap<>();
+    private static String scheduledAnimNamespace = null;
+    private static String scheduledAnimId = null;
+    private static long scheduledAnimFireTime = -1;
+
     public static boolean displayTemporaryElement(String elementId, String namespace, String texturePath, double x, double y, double scale, int textureWidth, int textureHeight) {
         ResourceLocation textureResource = AssetManager.loadTexture(namespace, texturePath);
         if (textureResource != null) {
@@ -66,6 +78,30 @@ public class AnimationManager {
         rotatingStates.clear();
         pulseStates.clear();
         BeatDetector.registeredAudioElements.clear();
+        isWaiting = false;
+        isPlayingStopAnim = false;
+        stopKeyframeIndex = -1;
+        lastWatchValues.clear();
+        scheduledAnimFireTime = -1;
+    }
+
+    public static void scheduleAnimation(String namespace, String animId, long delayMs) {
+        scheduledAnimNamespace = namespace;
+        scheduledAnimId = animId;
+        scheduledAnimFireTime = System.currentTimeMillis() + delayMs;
+    }
+
+    public static void triggerStop() {
+        if (currentAnimation == null) return;
+        StopAnimationData stopAnim = currentAnimation.getStopAnimation();
+        if (stopAnim != null && stopAnim.getKeyframes() != null && !stopAnim.getKeyframes().isEmpty()) {
+            isWaiting = false;
+            isPlayingStopAnim = true;
+            stopAnimStartTime = System.currentTimeMillis();
+            stopKeyframeIndex = -1;
+        } else {
+            stopAllAnimations();
+        }
     }
 
     public static void playAnimation(String namespace, String animationId) {
@@ -328,8 +364,53 @@ public class AnimationManager {
             }
         }
 
-        if (lastKeyframeIndex >= keyframes.size() - 1) {
-            stopAllAnimations();
+        if (scheduledAnimFireTime > 0 && System.currentTimeMillis() >= scheduledAnimFireTime) {
+            scheduledAnimFireTime = -1;
+            playAnimation(scheduledAnimNamespace, scheduledAnimId);
+            return;
+        }
+
+        if (isPlayingStopAnim) {
+            StopAnimationData stopAnim = currentAnimation.getStopAnimation();
+            long stopElapsed = System.currentTimeMillis() - stopAnimStartTime;
+            List<Keyframe> stopKeyframes = stopAnim.getKeyframes();
+            for (int i = stopKeyframeIndex + 1; i < stopKeyframes.size(); i++) {
+                Keyframe kf = stopKeyframes.get(i);
+                if (stopElapsed >= kf.getTimestamp()) {
+                    executeKeyframeActions(kf.getActions());
+                    stopKeyframeIndex = i;
+                } else {
+                    break;
+                }
+            }
+            if (stopKeyframeIndex >= stopKeyframes.size() - 1) {
+                stopAllAnimations();
+            }
+            return;
+        }
+
+        if (currentAnimation.getVariableWatches() != null) {
+            for (VariableWatch watch : currentAnimation.getVariableWatches()) {
+                String watchKey = watch.getNamespace() + ":" + watch.getVariable();
+                String currentVal = VariableManager.get(watch.getNamespace(), watch.getVariable());
+                String lastVal = lastWatchValues.get(watchKey);
+                if (!java.util.Objects.equals(currentVal, lastVal)) {
+                    lastWatchValues.put(watchKey, currentVal);
+                    if (watch.getActions() != null) {
+                        executeKeyframeActions(watch.getActions());
+                    }
+                }
+            }
+        }
+
+        if (!isWaiting) {
+            if (lastKeyframeIndex >= keyframes.size() - 1) {
+                if ("wait".equals(currentAnimation.getEndAction())) {
+                    isWaiting = true;
+                } else {
+                    stopAllAnimations();
+                }
+            }
         }
     }
 
@@ -360,6 +441,10 @@ public class AnimationManager {
         activeElements.clear();
         lastKeyframeIndex = -1;
         RawAudio.stopAll();
+        isWaiting = false;
+        isPlayingStopAnim = false;
+        scheduledAnimFireTime = -1;
+        lastWatchValues.clear();
     }
 
     public static void reload() {

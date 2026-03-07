@@ -23,39 +23,59 @@ public class RawAudio {
     public static final List<Integer> activeSources = new ArrayList<>();
     private static final Map<Integer, AudioData> sourceDataMap = new ConcurrentHashMap<>();
 
-    public static void playOgg(String path, float volume) {
+    private record DecodedAudio(ShortBuffer pcm, int sampleRate, int channels) {}
+    private record CachedAudio(int alBufferId, ShortBuffer pcm, int sampleRate, int channels) {}
+    private static final Map<String, DecodedAudio> decodedCache = new ConcurrentHashMap<>();
+    private static final Map<String, CachedAudio> audioCache = new ConcurrentHashMap<>();
+
+    public static void preloadOgg(String path) {
+        if (audioCache.containsKey(path) || decodedCache.containsKey(path)) return;
         try (STBVorbisInfo info = STBVorbisInfo.malloc()) {
             IntBuffer error = BufferUtils.createIntBuffer(1);
             long decoder = STBVorbis.stb_vorbis_open_filename(path, error, null);
             if (decoder == 0) {
-                LOGGER.error("Failed to open OGG: " + path + ", Error Code: " + error.get(0));
+                LOGGER.error("Failed to preload OGG: " + path + ", Error Code: " + error.get(0));
                 return;
             }
-
             STBVorbis.stb_vorbis_get_info(decoder, info);
             int channels = info.channels();
             int sampleRate = info.sample_rate();
-
             int lengthSamples = STBVorbis.stb_vorbis_stream_length_in_samples(decoder);
             ShortBuffer pcm = BufferUtils.createShortBuffer(lengthSamples * channels);
             STBVorbis.stb_vorbis_get_samples_short_interleaved(decoder, channels, pcm);
             pcm.rewind();
-
-            int buffer = AL10.alGenBuffers();
-            AL10.alBufferData(buffer, channels == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16,
-                    pcm, sampleRate);
-
-            int source = AL10.alGenSources();
-            AL10.alSourcei(source, AL10.AL_BUFFER, buffer);
-            AL10.alSourcef(source, AL10.AL_GAIN, volume);
-            AL10.alSourcePlay(source);
-
-            activeSources.add(source);
-            sourceDataMap.put(source, new AudioData(pcm, sampleRate, channels));
-
-            // We do not close the decoder here as the stream may still be playing.
-            // A separate cleanup mechanism is needed.
+            STBVorbis.stb_vorbis_close(decoder);
+            decodedCache.put(path, new DecodedAudio(pcm, sampleRate, channels));
+        } catch (Exception e) {
+            LOGGER.error("Failed to preload OGG: " + path, e);
         }
+    }
+
+    private static CachedAudio uploadToAL(String path) {
+        CachedAudio existing = audioCache.get(path);
+        if (existing != null) return existing;
+        DecodedAudio decoded = decodedCache.get(path);
+        if (decoded == null) {
+            preloadOgg(path);
+            decoded = decodedCache.get(path);
+            if (decoded == null) return null;
+        }
+        int alBuffer = AL10.alGenBuffers();
+        AL10.alBufferData(alBuffer, decoded.channels() == 1 ? AL10.AL_FORMAT_MONO16 : AL10.AL_FORMAT_STEREO16, decoded.pcm(), decoded.sampleRate());
+        CachedAudio cached = new CachedAudio(alBuffer, decoded.pcm(), decoded.sampleRate(), decoded.channels());
+        audioCache.put(path, cached);
+        return cached;
+    }
+
+    public static void playOgg(String path, float volume) {
+        CachedAudio cached = uploadToAL(path);
+        if (cached == null) return;
+        int source = AL10.alGenSources();
+        AL10.alSourcei(source, AL10.AL_BUFFER, cached.alBufferId());
+        AL10.alSourcef(source, AL10.AL_GAIN, volume);
+        AL10.alSourcePlay(source);
+        activeSources.add(source);
+        sourceDataMap.put(source, new AudioData(cached.pcm(), cached.sampleRate(), cached.channels()));
     }
 
     public static void stopAll() {
@@ -67,6 +87,13 @@ public class RawAudio {
         }
         activeSources.clear();
         sourceDataMap.clear();
+    }
+
+    public static void clearCache() {
+        for (CachedAudio cached : audioCache.values()) {
+            AL10.alDeleteBuffers(cached.alBufferId());
+        }
+        audioCache.clear();
     }
 
     public static AudioData getAudioData(int source) {

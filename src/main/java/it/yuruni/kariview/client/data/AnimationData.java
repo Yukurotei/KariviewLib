@@ -1,5 +1,6 @@
 package it.yuruni.kariview.client.data;
 
+import com.google.gson.annotations.SerializedName;
 import it.yuruni.kariview.client.data.elements.GuiElementData;
 
 import java.util.List;
@@ -9,6 +10,9 @@ public class AnimationData {
     private List<Keyframe> keyframes;
     private List<GuiElementData> elements;
     public String namespace = "";
+    @SerializedName("end_action") private String endAction = "stop";
+    @SerializedName("stop_animation") private StopAnimationData stopAnimation;
+    @SerializedName("variable_watches") private List<VariableWatch> variableWatches;
 
     public String getId() {
         return id;
@@ -47,5 +51,17 @@ public class AnimationData {
 
     public String getNamespace() {
         return namespace;
+    }
+
+    public String getEndAction() {
+        return endAction;
+    }
+
+    public StopAnimationData getStopAnimation() {
+        return stopAnimation;
+    }
+
+    public List<VariableWatch> getVariableWatches() {
+        return variableWatches;
     }
 }

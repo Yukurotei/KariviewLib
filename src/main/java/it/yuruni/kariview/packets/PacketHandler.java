@@ -1,9 +1,13 @@
 package it.yuruni.kariview.packets;
 
 import it.yuruni.kariview.Kariview;
+import it.yuruni.kariview.packets.server2client.AssetSyncCompletePacket;
+import it.yuruni.kariview.packets.server2client.AssetSyncPacket;
 import it.yuruni.kariview.packets.server2client.StopViewPacket;
 import it.yuruni.kariview.packets.server2client.PlayAnimationPacket;
 import it.yuruni.kariview.packets.server2client.ShowViewPacket;
+import it.yuruni.kariview.packets.server2client.StopAnimationPacket;
+import it.yuruni.kariview.packets.server2client.SetVariablePacket;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraftforge.network.NetworkRegistry;
 import net.minecraftforge.network.PacketDistributor;
@@ -36,6 +40,26 @@ public class PacketHandler {
                 PlayAnimationPacket::encode,
                 PlayAnimationPacket::decode,
                 PlayAnimationPacket::handle);
+        INSTANCE.registerMessage(packetId++,
+                AssetSyncPacket.class,
+                AssetSyncPacket::encode,
+                AssetSyncPacket::decode,
+                AssetSyncPacket::handle);
+        INSTANCE.registerMessage(packetId++,
+                AssetSyncCompletePacket.class,
+                AssetSyncCompletePacket::encode,
+                AssetSyncCompletePacket::decode,
+                AssetSyncCompletePacket::handle);
+        INSTANCE.registerMessage(packetId++,
+                StopAnimationPacket.class,
+                StopAnimationPacket::encode,
+                StopAnimationPacket::decode,
+                StopAnimationPacket::handle);
+        INSTANCE.registerMessage(packetId++,
+                SetVariablePacket.class,
+                SetVariablePacket::encode,
+                SetVariablePacket::decode,
+                SetVariablePacket::handle);
     }
 
     public static <MSG> void sendToAll(MSG message) {

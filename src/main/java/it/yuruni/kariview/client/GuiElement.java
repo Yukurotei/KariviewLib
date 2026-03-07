@@ -133,7 +133,12 @@ public class GuiElement {
         int drawX = initialX - (scaledWidth - initialWidth) / 2;
         int drawY = initialY - (scaledHeight - initialHeight) / 2;
 
+        RenderSystem.enableBlend();
+        RenderSystem.defaultBlendFunc();
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, this.opacity);
         guiGraphics.blit(this.texture, drawX, drawY, 0, 0, scaledWidth, scaledHeight, scaledWidth, scaledHeight);
+        RenderSystem.setShaderColor(1.0f, 1.0f, 1.0f, 1.0f);
+        RenderSystem.disableBlend();
     }
 
 
