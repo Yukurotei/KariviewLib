@@ -69,12 +69,10 @@ public final class RuntimeTypeAdapterFactory<T> implements TypeAdapterFactory {
                             + "; did you forget to register a subtype?");
                 }
                 JsonObject jsonObject = delegate.toJsonTree(value).getAsJsonObject();
-                if (jsonObject.has(typeFieldName)) {
-                    throw new IllegalArgumentException("Type field name '" + typeFieldName + "' is already in use.");
-                }
                 JsonObject clone = jsonObject.deepCopy();
+                clone.remove(typeFieldName); // remove class-level field if present to avoid conflict
                 clone.add(typeFieldName, new JsonPrimitive(label));
-                out.jsonValue(clone.toString());
+                gson.toJson(clone, out);
             }
 
             @Override

@@ -35,6 +35,11 @@ public class RotateAction implements Action {
         return easingType;
     }
 
+    public void setElementId(String elementId) { this.elementId = elementId; }
+    public void setTargetAngle(double targetAngle) { this.targetAngle = targetAngle; }
+    public void setDuration(long duration) { this.duration = duration; }
+    public void setEasingType(String easingType) { this.easingType = easingType; }
+
     @Override
     public void execute(AnimationContext ctx) {
         GuiElement element = ctx.activeElements.get(elementId);

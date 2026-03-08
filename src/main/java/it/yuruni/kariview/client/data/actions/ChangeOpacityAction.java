@@ -19,6 +19,11 @@ public class ChangeOpacityAction implements Action {
     public long getDuration() { return duration; }
     public String getEasingType() { return easingType; }
 
+    public void setElementId(String elementId) { this.elementId = elementId; }
+    public void setTargetOpacity(float targetOpacity) { this.targetOpacity = targetOpacity; }
+    public void setDuration(long duration) { this.duration = duration; }
+    public void setEasingType(String easingType) { this.easingType = easingType; }
+
     @Override
     public void execute(AnimationContext ctx) {
         GuiElement element = ctx.activeElements.get(elementId);

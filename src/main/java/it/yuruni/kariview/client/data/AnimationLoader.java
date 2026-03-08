@@ -65,6 +65,10 @@ public class AnimationLoader {
                 .create();
     }
 
+    public static Gson getGson() {
+        return GSON;
+    }
+
     public static void loadAllAnimations() {
         ANIMATION_CACHE.clear();
         File mainDir = FMLPaths.GAMEDIR.get().resolve(DATA_PACK_FOLDER).toFile();

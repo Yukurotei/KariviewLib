@@ -23,4 +23,8 @@ public class GuiElementData {
     public String getTexturePathPattern() {
         return texturePathPattern;
     }
+
+    public void setId(String id) { this.elementId = id; }
+    public void setTexturePath(String path) { this.texturePath = path; }
+    public void setTexturePathPattern(String pattern) { this.texturePathPattern = pattern; }
 }

@@ -63,6 +63,14 @@ public class ShowElementAction implements Action {
         return startOpacity;
     }
 
+    public void setElementId(String elementId) { this.elementId = elementId; }
+    public void setX(double x) { this.x = x; }
+    public void setY(double y) { this.y = y; }
+    public void setScale(double scale) { this.scale = scale; }
+    public void setTextureWidth(int textureWidth) { this.textureWidth = textureWidth; }
+    public void setTextureHeight(int textureHeight) { this.textureHeight = textureHeight; }
+    public void setStartOpacity(Float startOpacity) { this.startOpacity = startOpacity; }
+
     @Override
     public void execute(AnimationContext ctx) {
         GuiElementData elementData = ctx.currentAnimation.getElementById(elementId);

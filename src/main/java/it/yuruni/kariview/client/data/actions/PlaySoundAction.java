@@ -24,6 +24,9 @@ public class PlaySoundAction implements Action {
         return volume;
     }
 
+    public void setSoundId(String soundId) { this.soundId = soundId; }
+    public void setVolume(float volume) { this.volume = volume; }
+
     @Override
     public void execute(AnimationContext ctx) {
         File soundFile = AssetManager.loadSound(ctx.currentAnimation.getNamespace(), soundId);

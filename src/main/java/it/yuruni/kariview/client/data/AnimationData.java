@@ -9,7 +9,7 @@ public class AnimationData {
     private String id;
     private List<Keyframe> keyframes;
     private List<GuiElementData> elements;
-    public String namespace = "";
+    public transient String namespace = "";
     @SerializedName("end_action") private String endAction = "stop";
     @SerializedName("stop_animation") private StopAnimationData stopAnimation;
     @SerializedName("variable_watches") private List<VariableWatch> variableWatches;
@@ -63,5 +63,21 @@ public class AnimationData {
 
     public List<VariableWatch> getVariableWatches() {
         return variableWatches;
+    }
+
+    public void setId(String id) {
+        this.id = id;
+    }
+
+    public void setKeyframes(List<Keyframe> keyframes) {
+        this.keyframes = keyframes;
+    }
+
+    public void setElements(List<GuiElementData> elements) {
+        this.elements = elements;
+    }
+
+    public void setEndAction(String endAction) {
+        this.endAction = endAction;
     }
 }

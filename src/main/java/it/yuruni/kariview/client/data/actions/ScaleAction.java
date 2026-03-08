@@ -35,6 +35,11 @@ public class ScaleAction implements Action {
         return easingType;
     }
 
+    public void setElementId(String elementId) { this.elementId = elementId; }
+    public void setTargetScale(double targetScale) { this.targetScale = targetScale; }
+    public void setDuration(long duration) { this.duration = duration; }
+    public void setEasingType(String easingType) { this.easingType = easingType; }
+
     @Override
     public void execute(AnimationContext ctx) {
         GuiElement element = ctx.activeElements.get(elementId);

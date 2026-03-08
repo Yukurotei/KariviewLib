@@ -15,6 +15,8 @@ public class HideElementAction implements Action {
         return elementId;
     }
 
+    public void setElementId(String elementId) { this.elementId = elementId; }
+
     @Override
     public void execute(AnimationContext ctx) {
         try {
