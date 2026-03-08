@@ -19,7 +19,7 @@ public class MoveAction implements Action {
     @SerializedName("duration")
     private long duration;
     @SerializedName("easing_type")
-    private String easingType;
+    private String easingType = "linear";
 
     public String getElementId() {
         return elementId;

@@ -17,7 +17,7 @@ public class ExtendAction implements Action {
     private long duration;
     private String direction;
     @SerializedName("easing_type")
-    private String easingType;
+    private String easingType = "linear";
 
     public String getElementId() {
         return elementId;

@@ -89,6 +89,22 @@ public class RawAudio {
         sourceDataMap.clear();
     }
 
+    public static void pauseAll() {
+        for (int source : activeSources) {
+            if (AL10.alIsSource(source)) {
+                AL10.alSourcePause(source);
+            }
+        }
+    }
+
+    public static void resumeAll() {
+        for (int source : activeSources) {
+            if (AL10.alIsSource(source)) {
+                AL10.alSourcePlay(source);
+            }
+        }
+    }
+
     public static void clearCache() {
         for (CachedAudio cached : audioCache.values()) {
             AL10.alDeleteBuffers(cached.alBufferId());

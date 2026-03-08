@@ -185,9 +185,10 @@ public class AnimationEditorScreen extends Screen {
         if (!isPlaying) {
             isPlaying = true;
             playStartMs = System.currentTimeMillis() - currentTime;
+            RawAudio.resumeAll();
         } else {
             isPlaying = false;
-            RawAudio.stopAll();
+            RawAudio.pauseAll();
         }
     }
 
@@ -654,7 +655,7 @@ public class AnimationEditorScreen extends Screen {
 
         playedSoundKeyframes.removeIf(idx -> idx >= 0 &&
                 idx < currentAnimation.getKeyframes().size() &&
-                currentAnimation.getKeyframes().get(idx).getTimestamp() > time);
+                currentAnimation.getKeyframes().get(idx).getTimestamp() >= time);
 
         List<Keyframe> keyframes = currentAnimation.getKeyframes();
         for (int ki = 0; ki < keyframes.size(); ki++) {
@@ -667,8 +668,15 @@ public class AnimationEditorScreen extends Screen {
                 if (action instanceof ShowElementAction sea) {
                     GuiElementData data = currentAnimation.getElementById(sea.getElementId());
                     ResourceLocation tex = null;
-                    if (data != null && data.getTexture() != null)
-                        tex = AssetManager.loadTexture(currentAnimation.getNamespace(), data.getTexture());
+                    if (data != null) {
+                        String texPath = data.getTexture();
+                        if (texPath == null && data.getTexturePathPattern() != null) {
+                            // animated sprite: load the first frame (index 0)
+                            texPath = data.getTexturePathPattern().replace("%d", "0").replace("%02d", "00");
+                        }
+                        if (texPath != null)
+                            tex = AssetManager.loadTexture(currentAnimation.getNamespace(), texPath);
+                    }
                     float op = sea.getStartOpacity() != null ? sea.getStartOpacity() : 1.0f;
                     previewPos.put(sea.getElementId(),
                             new double[]{ sea.getX(), sea.getY(), sea.getWidth(), 1.0, 1.0, op, 0.0 });
@@ -1371,13 +1379,13 @@ public class AnimationEditorScreen extends Screen {
         File animationsDir = new File(namespaceDir, "animations");
 
         File targetFile = null;
-        String[] exts = {".json5", ".json"};
+        String[] exts = {".json", ".json5"};
         for (String ext : exts) {
             File f = new File(animationsDir, animId + ext);
             if (f.exists()) { targetFile = f; break; }
         }
         if (targetFile == null) {
-            targetFile = new File(animationsDir, animId + ".json5");
+            targetFile = new File(animationsDir, animId + ".json");
         }
 
         try {
@@ -1528,7 +1536,7 @@ public class AnimationEditorScreen extends Screen {
         modalBoxA.setX(mleft + 10); modalBoxA.setY(mtop + 34); modalBoxA.setWidth(mw - 20);
         modalBoxB.setX(mleft + 10); modalBoxB.setY(mtop + 86); modalBoxB.setWidth(mw - 20);
         modalBoxA.setValue(""); modalBoxA.setVisible(true);
-        modalBoxB.setValue("textures/"); modalBoxB.setVisible(true);
+        modalBoxB.setValue(""); modalBoxB.setVisible(true);
         setFocused(modalBoxA); modalBoxA.setFocused(true);
     }
 
@@ -1579,7 +1587,7 @@ public class AnimationEditorScreen extends Screen {
             g.fill(tBx, tBy, tBx + mw - 20, tBy + 14, 0x22FFFFFF); // subtle tint
             g.drawString(font, "Type:  " + (newElemIsSprite ? "\u25C6 Sprite" : "\u25C6 Normal"), tBx + 4, tBy + 3, C_ACCENT);
             // Label above modalBoxB
-            g.drawString(font, newElemIsSprite ? "Pattern:" : "Texture path:", mleft + 10, mtop + 73, C_DIM);
+            g.drawString(font, newElemIsSprite ? "Pattern (in textures/):" : "File (in textures/):", mleft + 10, mtop + 73, C_DIM);
             // modalBoxB renders itself at mtop+86
         }
 
@@ -1596,8 +1604,11 @@ public class AnimationEditorScreen extends Screen {
 
     private void createAnimation(String namespace, String animId) {
         String gameDir = System.getProperty("user.dir");
-        File animDir = new File(new File(new File(gameDir, "kariviewlib"), namespace), "animations");
+        File nsDir = new File(new File(gameDir, "kariviewlib"), namespace);
+        File animDir = new File(nsDir, "animations");
         animDir.mkdirs();
+        new File(new File(nsDir, "assets"), "textures").mkdirs();
+        new File(new File(nsDir, "assets"), "sounds").mkdirs();
         File file = new File(animDir, animId + ".json5");
 
         AnimationData data = new AnimationData();

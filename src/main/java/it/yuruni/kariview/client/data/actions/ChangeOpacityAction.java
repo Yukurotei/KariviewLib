@@ -12,7 +12,7 @@ public class ChangeOpacityAction implements Action {
     private float targetOpacity;
     private long duration;
     @SerializedName("easing_type")
-    private String easingType;
+    private String easingType = "linear";
 
     public String getElementId() { return elementId; }
     public float getTargetOpacity() { return targetOpacity; }
