@@ -129,7 +129,7 @@ public class AnimationEditorScreen extends Screen {
     };
 
     public AnimationEditorScreen() {
-        super(Component.literal("KariView Animation Editor"));
+        super(Component.translatable("KariView Animation Editor"));
     }
 
     @Override
@@ -139,28 +139,28 @@ public class AnimationEditorScreen extends Screen {
 
         int mid = width / 2;
 
-        addRenderableWidget(Button.builder(Component.literal("Back"),
+        addRenderableWidget(Button.builder(Component.translatable("Back"),
                 btn -> onClose()
         ).bounds(4, 4, 40, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("\u25B6"),
+        addRenderableWidget(Button.builder(Component.translatable("\u25B6"),
                 btn -> togglePlay()
         ).bounds(mid - 50, 4, 24, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("\u25A0"),
+        addRenderableWidget(Button.builder(Component.translatable("\u25A0"),
                 btn -> { isPlaying = false; currentTime = 0; playedSoundKeyframes.clear(); RawAudio.stopAll(); evaluateAtTime(0); }
         ).bounds(mid - 24, 4, 24, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("\u21BB"),
+        addRenderableWidget(Button.builder(Component.translatable("\u21BB"),
                 btn -> { AnimationLoader.loadAllAnimations(); refreshAnimationList(); }
         ).bounds(mid + 2, 4, 24, 20).build());
 
-        addRenderableWidget(Button.builder(Component.literal("Save"),
+        addRenderableWidget(Button.builder(Component.translatable("Save"),
                 btn -> saveCurrentAnimation()
         ).bounds(mid + 28, 4, 36, 20).build());
 
         // Property edit box (hidden until a property is clicked)
-        propEditBox = new EditBox(font, width - PROPS_W + 4, height - TIMELINE_H - 18, PROPS_W - 8, 14, Component.empty());
+        propEditBox = new EditBox(font, width - PROPS_W + 4, height - TIMELINE_H - 18, PROPS_W - 8, 14, Component.translatable(""));
         propEditBox.setVisible(false);
         propEditBox.setMaxLength(64);
         propEditBox.setResponder(val -> {});
@@ -169,12 +169,12 @@ public class AnimationEditorScreen extends Screen {
         // Modal input boxes (hidden until a modal is opened)
         int mw = 200, mh = 130;
         int mleft = (width - mw) / 2, mtop = (height - mh) / 2;
-        modalBoxA = new EditBox(font, mleft + 10, mtop + 34, mw - 20, 14, Component.empty());
+        modalBoxA = new EditBox(font, mleft + 10, mtop + 34, mw - 20, 14, Component.translatable(""));
         modalBoxA.setVisible(false);
         modalBoxA.setMaxLength(64);
         addRenderableWidget(modalBoxA);
 
-        modalBoxB = new EditBox(font, mleft + 10, mtop + 64, mw - 20, 14, Component.empty());
+        modalBoxB = new EditBox(font, mleft + 10, mtop + 64, mw - 20, 14, Component.translatable(""));
         modalBoxB.setVisible(false);
         modalBoxB.setMaxLength(128);
         addRenderableWidget(modalBoxB);

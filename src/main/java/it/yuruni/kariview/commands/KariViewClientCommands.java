@@ -8,6 +8,8 @@ import com.mojang.brigadier.context.CommandContext;
 import it.yuruni.kariview.Kariview;
 import it.yuruni.kariview.client.KariviewRenderer;
 import it.yuruni.kariview.client.animation.AnimationManager;
+import it.yuruni.kariview.client.camera.CameraController;
+import net.minecraft.client.Minecraft;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.Commands;
 import net.minecraft.network.chat.Component;
@@ -48,6 +50,22 @@ public class KariViewClientCommands {
                         .then(Commands.literal("hideAllElements")
                                 .executes(KariViewClientCommands::executeHideAllElementsClient)
                         )
+                        .then(Commands.literal("testcam")
+                                .executes(ctx -> {
+                                    var player = Minecraft.getInstance().player;
+                                    if (player == null) return 0;
+                                    if (CameraController.isActive()) {
+                                        CameraController.exit();
+                                        ctx.getSource().sendSuccess(() -> Component.translatable("[Kariview] Camera exit"), false);
+                                    } else {
+                                        CameraController.enter(new CameraController.View()
+                                                .position(player.position().add(0, 6, 0))
+                                                .pitch(90f));
+                                        ctx.getSource().sendSuccess(() -> Component.translatable("[Kariview] Camera enter"), false);
+                                    }
+                                    return 1;
+                                })
+                        )
         );
     }
 
@@ -64,10 +82,10 @@ public class KariViewClientCommands {
         boolean isSuccess = AnimationManager.displayTemporaryElement(elementId, namespace, texturePath, x, y, scale, textureWidth, textureHeight);
         if (isSuccess) {
             KariviewRenderer.isGuiActive = true;
-            ctx.getSource().sendSuccess(() -> Component.literal("Displaying temporary element: " + elementId), false);
+            ctx.getSource().sendSuccess(() -> Component.translatable("Displaying temporary element: " + elementId), false);
             return 1;
         } else {
-            ctx.getSource().sendFailure(Component.literal("An error occurred while trying to display that image. Did you spell out everything correctly? Make sure to include file extensions!"));
+            ctx.getSource().sendFailure(Component.translatable("An error occurred while trying to display that image. Did you spell out everything correctly? Make sure to include file extensions!"));
             return 0;
         }
     }
@@ -76,7 +94,7 @@ public class KariViewClientCommands {
         AnimationManager.hideAllTemporaryElements();
         KariviewRenderer.isGuiActive = false;
 
-        ctx.getSource().sendSuccess(() -> Component.literal("Hiding all temporary elements."), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("Hiding all temporary elements."), false);
         return 1;
     }
 }

@@ -86,18 +86,18 @@ public class KariViewCommands {
 
     private static int reloadAnimations(CommandContext<CommandSourceStack> context) {
         AnimationManager.reload();
-        context.getSource().sendSuccess(() -> Component.literal("Animations reloaded."), false);
+        context.getSource().sendSuccess(() -> Component.translatable("Animations reloaded."), false);
         return 1;
     }
 
     private static int executeShowView(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSuccess(() -> Component.literal("Displaying custom view..."), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("Displaying custom view..."), false);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new ShowViewPacket());
         return 1;
     }
 
     private static int executeStopView(CommandContext<CommandSourceStack> ctx) {
-        ctx.getSource().sendSuccess(() -> Component.literal("Hiding custom view..."), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("Hiding custom view..."), false);
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new StopViewPacket());
         return 1;
     }
@@ -107,7 +107,7 @@ public class KariViewCommands {
         for (ServerPlayer player : players) {
             PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new StopAnimationPacket());
         }
-        ctx.getSource().sendSuccess(() -> Component.literal("Sent stop command to " + players.size() + " player(s)."), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("Sent stop command to " + players.size() + " player(s)."), false);
         return 1;
     }
 
@@ -116,7 +116,7 @@ public class KariViewCommands {
         String name = StringArgumentType.getString(ctx, "name");
         String value = StringArgumentType.getString(ctx, "value");
         PacketHandler.INSTANCE.send(PacketDistributor.ALL.noArg(), new SetVariablePacket(namespace, name, value));
-        ctx.getSource().sendSuccess(() -> Component.literal("Set " + namespace + "." + name + " = " + value + " for all players."), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("Set " + namespace + "." + name + " = " + value + " for all players."), false);
         return 1;
     }
 
@@ -128,7 +128,7 @@ public class KariViewCommands {
         for (ServerPlayer player : players) {
             PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new SetVariablePacket(namespace, name, value));
         }
-        ctx.getSource().sendSuccess(() -> Component.literal("Set " + namespace + "." + name + " = " + value + " for " + players.size() + " player(s)."), false);
+        ctx.getSource().sendSuccess(() -> Component.translatable("Set " + namespace + "." + name + " = " + value + " for " + players.size() + " player(s)."), false);
         return 1;
     }
 
@@ -143,12 +143,12 @@ public class KariViewCommands {
                 for (ServerPlayer player : players) {
                     PacketHandler.INSTANCE.send(PacketDistributor.PLAYER.with(() -> player), new PlayAnimationPacket(namespace, animationId));
                 }
-                ctx.getSource().sendSuccess(() -> Component.literal("Playing animation: " + namespace + ":" + animationId + " for " + players.size() + " players."), false);
+                ctx.getSource().sendSuccess(() -> Component.translatable("Playing animation: " + namespace + ":" + animationId + " for " + players.size() + " players."), false);
             } else {
-                ctx.getSource().sendFailure(Component.literal("Unknown animation: " + namespace + ":" + animationId));
+                ctx.getSource().sendFailure(Component.translatable("Unknown animation: " + namespace + ":" + animationId));
             }
         } catch (Exception e) {
-            ctx.getSource().sendFailure(Component.literal("Failed to play animation: " + e.getMessage()));
+            ctx.getSource().sendFailure(Component.translatable("Failed to play animation: " + e.getMessage()));
             e.printStackTrace();
         }
 

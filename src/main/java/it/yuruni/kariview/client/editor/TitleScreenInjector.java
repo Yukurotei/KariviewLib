@@ -16,7 +16,7 @@ public class TitleScreenInjector {
     public static void onScreenInit(ScreenEvent.Init.Post event) {
         if (!(event.getScreen() instanceof TitleScreen screen)) return;
         Button button = Button.builder(
-                Component.literal("Animation Editor"),
+                Component.translatable("Animation Editor"),
                 btn -> Minecraft.getInstance().setScreen(new AnimationEditorScreen())
         ).bounds(screen.width - 112, 8, 104, 20).build();
         event.addListener(button);

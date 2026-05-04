@@ -1,0 +1,14 @@
+{
+  "required": true,
+  "minVersion": "0.8",
+  "package": "it.yuruni.kariview.mixin",
+  "compatibilityLevel": "JAVA_17",
+  "refmap": "kariviewlib.refmap.json",
+  "mixins": [],
+  "client": [
+    "CameraMixin"
+  ],
+  "injectors": {
+    "defaultRequire": 1
+  }
+}
